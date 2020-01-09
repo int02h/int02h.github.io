@@ -2,12 +2,12 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Categories on Daniil Popov</title>
-    <link>https://int02h.github.io/categories/</link>
+    <link>https://int02h.ru/categories/</link>
     <description>Recent content in Categories on Daniil Popov</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     
-	<atom:link href="https://int02h.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://int02h.ru/categories/index.xml" rel="self" type="application/rss+xml" />
     
     
   </channel>
