@@ -1,14 +1,37 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Daniil Popov</title>
+    <title>Даниил Попов</title>
     <link>https://int02h.ru/</link>
-    <description>Recent content on Daniil Popov</description>
+    <description>Recent content on Даниил Попов</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
+    <language>ru</language>
     
 	<atom:link href="https://int02h.ru/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title></title>
+      <link>https://int02h.ru/speaking/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://int02h.ru/speaking/</guid>
+      <description>Автоматизация темизации приложения. Генерация стилей, ресурсов и атрибутов
+Android Devs Meetup. Москва, сентябрь 2018
+Video, Slides
+ Как Gradle может сделать разработку Android-приложений проще
+CodeFest. Новосибирск, март 2019
+Video, Slides
+ Dynamic proxy и runtime-кодогенерация на Android
+AppsConf. Москва, апрель 2019
+Video, Slides
+ Учимся на плохих примерах: SOLID в Android
+Стачка. Иннополис, октябрь 2019
+Slides
+ Учимся на плохих примерах: SOLID в Android
+MadConf. Ульяновск, ноябрь 2019
+Slides</description>
+    </item>
     
   </channel>
 </rss>
