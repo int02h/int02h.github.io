@@ -1,0 +1,239 @@
+<head>
+	<style>
+        .outer-div {
+        }
+        
+        .inner-div {
+            display: inline-block;
+        }
+    </style>
+	<script type="text/javascript">
+
+		const tickPerSecond = 5
+
+		const defaultCtx = {
+			// params
+			rider_per_second: 0.33,
+			ride_duration_s: 5,
+
+			// counters
+			total_ride_count: 0,
+			total_money: 0,
+			rider_count_raw: 0,
+			rider_count: 0,
+			available_driver_count: 1,
+
+			// flags
+			has_dispatcher: false,
+
+			// timestamps
+			driver_available_at: [],
+
+			// prices
+			ride_price: 1.99,
+			hire_driver_price: 10,
+			hire_dispatcher_price: 25,
+
+			// other
+			marketing_level: 0,
+		}
+		let ctx = {}
+
+		let riderCountView
+		let totalRideCountView
+		let totalMoneyView
+		let totalDriverCountView
+		let availableDriverCountView
+
+		let startRideButton
+		let hireDriverButton
+		let hireDispatcherButton
+		let buyNextMarketingButton
+
+		// let tickCount = 0
+		// function nowSecond() {
+		// 	return (tickCount++) / tickPerSecond
+		// }
+
+		function nowSecond() {
+			return Date.now() / 1000
+		}
+
+		function init() {
+			riderCountView = document.getElementById("rider_count")
+			totalRideCountView = document.getElementById("total_ride_count")
+			totalMoneyView = document.getElementById("total_money")
+			totalDriverCountView = document.getElementById("total_driver_count")
+			availableDriverCountView = document.getElementById("available_driver_count")
+			startRideButton = document.getElementById("start_ride_btn")
+			hireDriverButton = document.getElementById("hire_driver")
+			hireDispatcherButton = document.getElementById("hire_dispatcher")
+			buyNextMarketingButton = document.getElementById("buy_next_marketing")
+
+			startRideButton.onclick = startRide
+			hireDriverButton.onclick = hireDriver
+			hireDispatcherButton.onclick = hireDispatcher
+			buyNextMarketingButton.onclick = buyNextMarketing
+
+			if (localStorage.game_ctx) {
+				ctx = JSON.parse(localStorage.game_ctx)
+			} else {
+				ctx = defaultCtx
+			}
+
+			onGameTick()
+			setInterval(onGameTick, 1000 / tickPerSecond)
+
+			setInterval(saveGame, 1000)
+		}
+
+		function onGameTick() {
+			ctx.rider_count_raw += ctx.rider_per_second / tickPerSecond
+			ctx.rider_count = Math.floor(ctx.rider_count_raw)
+
+			const nowS = nowSecond()
+			const finished = ctx.driver_available_at.filter(info => info.ts <= nowS)
+			ctx.driver_available_at = ctx.driver_available_at.filter(info => info.ts > nowS)
+
+			for (const info of finished) {
+				ctx.total_ride_count += info.amount
+				ctx.available_driver_count += info.amount
+				ctx.total_money += info.amount * ctx.ride_price
+			}
+
+			if (ctx.has_dispatcher) {
+				startRide()
+			}
+
+			updateViews()
+		}
+
+		function updateViews() {
+			riderCountView.innerHTML = `${ctx.rider_count}`
+			totalRideCountView.innerHTML = `${ctx.total_ride_count}`
+			totalMoneyView.innerHTML = `${formatPrice(ctx.total_money)}`
+
+			const totalDriverCount = ctx.available_driver_count + ctx.driver_available_at.reduce((sum, info) => sum + info.amount, 0)
+			totalDriverCountView.innerHTML = `${totalDriverCount}`
+			availableDriverCountView.innerHTML = `${ctx.available_driver_count}`
+			
+			startRideButton.disabled = !canStartRide()
+			
+			hireDriverButton.disabled = !canHireDriver()
+			hireDriverButton.innerHTML = `Hire driver ${formatPrice(ctx.hire_driver_price)}`
+
+			hireDispatcherButton.disabled = !canHireDispatcher()
+			hireDispatcherButton.innerHTML = `Hire dispatcher ${formatPrice(ctx.hire_dispatcher_price)}`
+
+			buyNextMarketingButton.disabled = !canBuyNextMarketing()
+			buyNextMarketingButton.innerHTML = `${getNextMarketingTitle()} ${formatPrice(getNextMarketingPrice())}`
+		}
+
+		function startRide() {
+			if (canStartRide()) {
+				const rideCount = Math.min(ctx.rider_count, ctx.available_driver_count)
+				ctx.rider_count_raw -= rideCount
+				ctx.available_driver_count -= rideCount
+				const nowS = nowSecond()
+				ctx.driver_available_at.push({ ts: nowS + ctx.ride_duration_s, amount: rideCount})
+			}
+		}
+
+		function canStartRide() {
+			return ctx.available_driver_count > 0 && ctx.rider_count > 0
+		}
+
+		function hireDriver() {
+			if (canHireDriver()) {
+				ctx.total_money -= ctx.hire_driver_price
+				ctx.available_driver_count++
+			}
+		}
+
+		function canHireDriver() {
+			return ctx.total_money >= ctx.hire_driver_price
+		}
+
+		function hireDispatcher() {
+			if (canHireDispatcher()) {
+				ctx.total_money -= ctx.hire_dispatcher_price
+				ctx.has_dispatcher = true
+			}
+		}
+
+		function canHireDispatcher() {
+			return !ctx.has_dispatcher && ctx.total_money >= ctx.hire_dispatcher_price
+		}
+
+		function buyNextMarketing() {
+			if (canBuyNextMarketing()) {
+				ctx.marketing_level++
+				ctx.rider_per_second = getRiderPerSecondForCurrentMarketingLevel()
+			}
+		}
+
+		function canBuyNextMarketing() {
+			return ctx.total_money >= getNextMarketingPrice()
+		}
+
+		function getNextMarketingPrice() {
+			const basePrice = 50
+			return Math.pow(basePrice, Math.max(1.0, 1 + ctx.marketing_level / 5))
+		}
+
+		function getNextMarketingTitle() {
+			switch (ctx.marketing_level) {
+				case 0: return "Distribute leaflets"
+				case 1: return "Distribute leaflets again"
+				case 2: return "Stickers at bus stops"
+			}
+			return "Other"
+		}
+
+		function getRiderPerSecondForCurrentMarketingLevel() {
+			switch (ctx.marketing_level) {
+				case 1: return 4 * ctx.rider_per_second
+			}
+			return 1.1 * ctx.rider_per_second
+		}
+
+		function formatPrice(price) {
+			return `${price.toFixed(2)}€`
+		}
+
+		function saveGame() {
+			localStorage.game_ctx = JSON.stringify(ctx)
+		}
+
+		function resetGame() {
+			ctx = defaultCtx
+			saveGame()
+		}
+	</script>
+</head>
+<body>
+	<div>Total ride count: <div id="total_ride_count" class="inner-div"></div></div>
+	<div>Total money: <div id="total_money" class="inner-div"></div></div>
+	<div>Rider count: <div id="rider_count" class="inner-div"></div></div>
+	<div>Total driver count: <div id="total_driver_count" class="inner-div"></div></div>
+	<div>Available driver count: <div id="available_driver_count" class="inner-div"></div></div>
+	
+	<br/>
+	<div><button id="start_ride_btn">Start ride</button></div>
+	<div><button id="hire_driver"/></div>
+	<div><button id="hire_dispatcher"/></div>
+	<div><button id="buy_next_marketing"/></div>
+
+	<br/>
+	<br/>
+	<div>
+		<button onclick="onGameTick()">Tick</button>
+	</div>
+	<div>
+		<button onclick="resetGame()">Reset game</button>
+	</div>
+
+	<script type="text/javascript">
+		init()
+	</script>
+</body>
