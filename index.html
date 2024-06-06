@@ -1,239 +1,261 @@
 <head>
-	<style>
+    <style>
         .outer-div {
         }
         
         .inner-div {
             display: inline-block;
         }
+
+        .effect-button {
+            display: block;
+        }
+
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+
+        .popup {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #f9f9f9;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+        }
     </style>
-	<script type="text/javascript">
+    <script type="text/javascript" src="effects.js"></script>
+    <script type="text/javascript">
 
-		const tickPerSecond = 5
+        const tickPerSecond = 5
 
-		const defaultCtx = {
-			// params
-			rider_per_second: 0.33,
-			ride_duration_s: 5,
+        const defaultCtx = {
+            // params
+            rider_per_second: 0,
+            ride_duration_s: 5,
 
-			// counters
-			total_ride_count: 0,
-			total_money: 0,
-			rider_count_raw: 0,
-			rider_count: 0,
-			available_driver_count: 1,
+            // counters
+            total_ride_count: 0,
+            total_money: 0,
+            rider_count_raw: 0,
+            rider_count: 0,
+            total_driver_count: 1,
+            available_driver_count: 1,
 
-			// flags
-			has_dispatcher: false,
+            // flags
+            has_dispatcher: false,
 
-			// timestamps
-			driver_available_at: [],
+            // timestamps
+            driver_available_at: [],
 
-			// prices
-			ride_price: 1.99,
-			hire_driver_price: 10,
-			hire_dispatcher_price: 25,
+            // prices
+            ride_price: 1.99,
+            hire_driver_price: 10,
 
-			// other
-			marketing_level: 0,
-		}
-		let ctx = {}
+            // effects and events
+            applied_effects: [],
+            occured_events: [],
+        }
+        let ctx = {}
 
-		let riderCountView
-		let totalRideCountView
-		let totalMoneyView
-		let totalDriverCountView
-		let availableDriverCountView
+        const effects = createEffects()
 
-		let startRideButton
-		let hireDriverButton
-		let hireDispatcherButton
-		let buyNextMarketingButton
+        let riderCountView
+        let totalRideCountView
+        let totalMoneyView
+        let totalDriverCountView
+        let availableDriverCountView
+        let effectContainerView
+        let ridePriceView
 
-		// let tickCount = 0
-		// function nowSecond() {
-		// 	return (tickCount++) / tickPerSecond
-		// }
+        let inviteRiderButton
+        let startRideButton
 
-		function nowSecond() {
-			return Date.now() / 1000
-		}
+        let gameTickIntervalId
 
-		function init() {
-			riderCountView = document.getElementById("rider_count")
-			totalRideCountView = document.getElementById("total_ride_count")
-			totalMoneyView = document.getElementById("total_money")
-			totalDriverCountView = document.getElementById("total_driver_count")
-			availableDriverCountView = document.getElementById("available_driver_count")
-			startRideButton = document.getElementById("start_ride_btn")
-			hireDriverButton = document.getElementById("hire_driver")
-			hireDispatcherButton = document.getElementById("hire_dispatcher")
-			buyNextMarketingButton = document.getElementById("buy_next_marketing")
+        // let tickCount = 0
+        // function nowSecond() {
+        //  return (tickCount++) / tickPerSecond
+        // }
 
-			startRideButton.onclick = startRide
-			hireDriverButton.onclick = hireDriver
-			hireDispatcherButton.onclick = hireDispatcher
-			buyNextMarketingButton.onclick = buyNextMarketing
+        function nowSecond() {
+            return Date.now() / 1000
+        }
 
-			if (localStorage.game_ctx) {
-				ctx = JSON.parse(localStorage.game_ctx)
-			} else {
-				ctx = defaultCtx
-			}
+        function init() {
+            riderCountView = document.getElementById("rider_count")
+            totalRideCountView = document.getElementById("total_ride_count")
+            totalMoneyView = document.getElementById("total_money")
+            totalDriverCountView = document.getElementById("total_driver_count")
+            availableDriverCountView = document.getElementById("available_driver_count")
+            inviteRiderButton = document.getElementById("invite_rider_btn") 
+            startRideButton = document.getElementById("start_ride_btn")
+            effectContainerView = document.getElementById("effect_container")
+            ridePriceView = document.getElementById("ride_price")
 
-			onGameTick()
-			setInterval(onGameTick, 1000 / tickPerSecond)
+            inviteRiderButton.onclick = inviteRider
+            startRideButton.onclick = startRide
 
-			setInterval(saveGame, 1000)
-		}
+            if (localStorage.game_ctx) {
+                ctx = JSON.parse(localStorage.game_ctx)
+            } else {
+                ctx = defaultCtx
+            }
 
-		function onGameTick() {
-			ctx.rider_count_raw += ctx.rider_per_second / tickPerSecond
-			ctx.rider_count = Math.floor(ctx.rider_count_raw)
+            resumeGame()
+            setInterval(saveGame, 1000)
+        }
 
-			const nowS = nowSecond()
-			const finished = ctx.driver_available_at.filter(info => info.ts <= nowS)
-			ctx.driver_available_at = ctx.driver_available_at.filter(info => info.ts > nowS)
+        function onGameTick() {
+            ctx.rider_count_raw += ctx.rider_per_second / tickPerSecond
+            ctx.rider_count = Math.floor(ctx.rider_count_raw)
 
-			for (const info of finished) {
-				ctx.total_ride_count += info.amount
-				ctx.available_driver_count += info.amount
-				ctx.total_money += info.amount * ctx.ride_price
-			}
+            const nowS = nowSecond()
+            const finished = ctx.driver_available_at.filter(info => info.ts <= nowS)
+            ctx.driver_available_at = ctx.driver_available_at.filter(info => info.ts > nowS)
 
-			if (ctx.has_dispatcher) {
-				startRide()
-			}
+            for (const info of finished) {
+                ctx.total_ride_count += info.amount
+                ctx.available_driver_count += info.amount
+                ctx.total_money += info.amount * ctx.ride_price
+            }
 
-			updateViews()
-		}
+            if (ctx.has_dispatcher) {
+                startRide()
+            }
 
-		function updateViews() {
-			riderCountView.innerHTML = `${ctx.rider_count}`
-			totalRideCountView.innerHTML = `${ctx.total_ride_count}`
-			totalMoneyView.innerHTML = `${formatPrice(ctx.total_money)}`
+            updateViews()
+        }
 
-			const totalDriverCount = ctx.available_driver_count + ctx.driver_available_at.reduce((sum, info) => sum + info.amount, 0)
-			totalDriverCountView.innerHTML = `${totalDriverCount}`
-			availableDriverCountView.innerHTML = `${ctx.available_driver_count}`
-			
-			startRideButton.disabled = !canStartRide()
-			
-			hireDriverButton.disabled = !canHireDriver()
-			hireDriverButton.innerHTML = `Hire driver ${formatPrice(ctx.hire_driver_price)}`
+        function updateViews() {
+            riderCountView.innerHTML = `${ctx.rider_count}`
+            totalRideCountView.innerHTML = `${ctx.total_ride_count}`
+            totalMoneyView.innerHTML = `${formatPrice(ctx.total_money)}`
 
-			hireDispatcherButton.disabled = !canHireDispatcher()
-			hireDispatcherButton.innerHTML = `Hire dispatcher ${formatPrice(ctx.hire_dispatcher_price)}`
+            totalDriverCountView.innerHTML = `${ctx.total_driver_count}`
+            availableDriverCountView.innerHTML = `${ctx.available_driver_count}`
+            
+            startRideButton.disabled = !canStartRide()
+            startRideButton.hidden = ctx.has_dispatcher
+            ridePriceView.innerHTML = `${formatPrice(ctx.ride_price)}`
 
-			buyNextMarketingButton.disabled = !canBuyNextMarketing()
-			buyNextMarketingButton.innerHTML = `${getNextMarketingTitle()} ${formatPrice(getNextMarketingPrice())}`
-		}
+            // effects
+            var effectIdMap = new Map()
+            for (const child of effectContainerView.children) { effectIdMap.set(child.id, child) }
+            effects.filter(e => e.isVisible(ctx))
+                .forEach(e => {
+                    effectIdMap.delete(e.id)
+                    let effectView = effectContainerView.querySelector(`#${e.id}`)
+                    if (!effectView) {
+                        effectView = document.createElement("button")
+                        effectView.id = e.id
+                        effectView.className = 'effect-button'
+                        effectView.onclick = function() { e.apply(ctx) }
+                        effectContainerView.appendChild(effectView)
+                    }
+                    effectView.innerHTML = e.getTitle(ctx)
+                    effectView.disabled = !e.canApply(ctx)
+                });
 
-		function startRide() {
-			if (canStartRide()) {
-				const rideCount = Math.min(ctx.rider_count, ctx.available_driver_count)
-				ctx.rider_count_raw -= rideCount
-				ctx.available_driver_count -= rideCount
-				const nowS = nowSecond()
-				ctx.driver_available_at.push({ ts: nowS + ctx.ride_duration_s, amount: rideCount})
-			}
-		}
+            effectIdMap.values().forEach(child => {
+                child.remove()
+            });
+        }
 
-		function canStartRide() {
-			return ctx.available_driver_count > 0 && ctx.rider_count > 0
-		}
+        function inviteRider() {
+            ctx.rider_count_raw += 1
+        }
 
-		function hireDriver() {
-			if (canHireDriver()) {
-				ctx.total_money -= ctx.hire_driver_price
-				ctx.available_driver_count++
-			}
-		}
+        function startRide() {
+            if (canStartRide()) {
+                const rideCount = Math.min(ctx.rider_count, ctx.available_driver_count)
+                ctx.rider_count_raw -= rideCount
+                ctx.available_driver_count -= rideCount
+                const nowS = nowSecond()
+                ctx.driver_available_at.push({ ts: nowS + ctx.ride_duration_s, amount: rideCount})
+            }
+        }
 
-		function canHireDriver() {
-			return ctx.total_money >= ctx.hire_driver_price
-		}
+        function canStartRide() {
+            return ctx.available_driver_count > 0 && ctx.rider_count > 0
+        }
 
-		function hireDispatcher() {
-			if (canHireDispatcher()) {
-				ctx.total_money -= ctx.hire_dispatcher_price
-				ctx.has_dispatcher = true
-			}
-		}
+        function formatPrice(price) {
+            return `${price.toFixed(2)}€`
+        }
 
-		function canHireDispatcher() {
-			return !ctx.has_dispatcher && ctx.total_money >= ctx.hire_dispatcher_price
-		}
+        function saveGame() {
+            localStorage.game_ctx = JSON.stringify(ctx)
+        }
 
-		function buyNextMarketing() {
-			if (canBuyNextMarketing()) {
-				ctx.marketing_level++
-				ctx.rider_per_second = getRiderPerSecondForCurrentMarketingLevel()
-			}
-		}
+        function resetGame() {
+            ctx = defaultCtx
+            saveGame()
+        }
 
-		function canBuyNextMarketing() {
-			return ctx.total_money >= getNextMarketingPrice()
-		}
+        function pauseGame() {
+            clearInterval(gameTickIntervalId)
+        }
 
-		function getNextMarketingPrice() {
-			const basePrice = 50
-			return Math.pow(basePrice, Math.max(1.0, 1 + ctx.marketing_level / 5))
-		}
-
-		function getNextMarketingTitle() {
-			switch (ctx.marketing_level) {
-				case 0: return "Distribute leaflets"
-				case 1: return "Distribute leaflets again"
-				case 2: return "Stickers at bus stops"
-			}
-			return "Other"
-		}
-
-		function getRiderPerSecondForCurrentMarketingLevel() {
-			switch (ctx.marketing_level) {
-				case 1: return 4 * ctx.rider_per_second
-			}
-			return 1.1 * ctx.rider_per_second
-		}
-
-		function formatPrice(price) {
-			return `${price.toFixed(2)}€`
-		}
-
-		function saveGame() {
-			localStorage.game_ctx = JSON.stringify(ctx)
-		}
-
-		function resetGame() {
-			ctx = defaultCtx
-			saveGame()
-		}
-	</script>
+        function resumeGame() {
+            onGameTick()
+            gameTickIntervalId = setInterval(onGameTick, 1000 / tickPerSecond)
+        }
+    </script>
 </head>
 <body>
-	<div>Total ride count: <div id="total_ride_count" class="inner-div"></div></div>
-	<div>Total money: <div id="total_money" class="inner-div"></div></div>
-	<div>Rider count: <div id="rider_count" class="inner-div"></div></div>
-	<div>Total driver count: <div id="total_driver_count" class="inner-div"></div></div>
-	<div>Available driver count: <div id="available_driver_count" class="inner-div"></div></div>
-	
-	<br/>
-	<div><button id="start_ride_btn">Start ride</button></div>
-	<div><button id="hire_driver"/></div>
-	<div><button id="hire_dispatcher"/></div>
-	<div><button id="buy_next_marketing"/></div>
+    <div class="popup-overlay" id="popup-overlay">
+        <div class="popup">
+            <div id="popup-content">
+                <p>Welcome to our website!</p>
+                <p>Sign up to receive exclusive offers:</p>
+                <input type="email" placeholder="Your email" id="emailInput">
+                <button onclick="closePopup()">OK</button>
+            </div>
+        </div>
+    </div>
 
-	<br/>
-	<br/>
-	<div>
-		<button onclick="onGameTick()">Tick</button>
-	</div>
-	<div>
-		<button onclick="resetGame()">Reset game</button>
-	</div>
+    <div>Total ride count: <div id="total_ride_count" class="inner-div"></div></div>
+    <div>Total money: <div id="total_money" class="inner-div"></div></div>
+    <div>Ride price: <div id="ride_price" class="inner-div"></div></div>
+    <div>Rider count: <div id="rider_count" class="inner-div"></div></div>
+    <div>Total driver count: <div id="total_driver_count" class="inner-div"></div></div>
+    <div>Available driver count: <div id="available_driver_count" class="inner-div"></div></div>
+    
+    <br/>
+    <div><button id="invite_rider_btn">Invite rider</button></div>
+    <div><button id="start_ride_btn">Start ride</button></div>
 
-	<script type="text/javascript">
-		init()
-	</script>
+    <br/>
+    <div id="effect_container"></div>
+
+    <br/>
+    <br/>
+    <div>
+        <button onclick="openPopup()">Tick</button>
+    </div>
+    <div>
+        <button onclick="resetGame()">Reset game</button>
+    </div>
+
+    <script type="text/javascript" src="popup.js"></script>
+    <script type="text/javascript">
+        init()
+    </script>
 </body>
