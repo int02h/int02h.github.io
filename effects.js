@@ -1,15 +1,13 @@
-const createEffects = (ctx) => {
+const createEffects = function(ctx) {
 
     const driver = new function() {
-        const basePrice = 10
-
         this.id = "driver"
         this.getTitle = function(ctx) { return `Hire driver ${formatPrice(ctx.hire_driver_price)}`}
         this.isVisible = function(ctx) { return true }
         this.canApply = function(ctx) { return ctx.total_money >= ctx.hire_driver_price }
         this.apply = function(ctx) {
             ctx.total_money -= ctx.hire_driver_price
-            ctx.hire_driver_price = Math.pow(basePrice, 1 + ctx.total_driver_count / 20)
+            ctx.hire_driver_price *= 1.1
             ctx.available_driver_count++
             ctx.total_driver_count++
         }
@@ -33,12 +31,12 @@ const createEffects = (ctx) => {
         const price = 50.00
 
         this.id = "stickers"
-        this.getTitle = function(ctx) { return `Sticker on bus stops ${formatPrice(price)}` },
+        this.getTitle = function(ctx) { return `Stickers on bus stops ${formatPrice(price)}` },
         this.isVisible = function (ctx) { return !ctx.applied_effects.includes(this.id) && ctx.total_driver_count >= 3 },
         this.canApply = function (ctx) { return ctx.total_money >= price && this.isVisible(ctx) }
         this.apply = function (ctx) {
             ctx.applied_effects.push(this.id)
-            ctx.rider_per_second = 0.5
+            ctx.rider_per_second = 0.7
             ctx.total_money -= price
         }
     };
@@ -66,7 +64,7 @@ const createEffects = (ctx) => {
         this.canApply = function (ctx) { return ctx.total_money >= price && this.isVisible(ctx) }
         this.apply = function (ctx) {
             ctx.applied_effects.push(this.id)
-            ctx.rider_per_second *= 5
+            ctx.rider_per_second *= 4
             ctx.total_money -= price
         }
     };
@@ -80,7 +78,7 @@ const createEffects = (ctx) => {
         this.canApply = function (ctx) { return ctx.total_money >= price && this.isVisible(ctx) }
         this.apply = function (ctx) {
             ctx.applied_effects.push(this.id)
-            ctx.rider_per_second *= 10
+            ctx.rider_per_second *= 5
             ctx.total_money -= price
         }
     };
