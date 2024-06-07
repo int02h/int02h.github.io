@@ -181,7 +181,7 @@
                     effectView.disabled = !e.canApply(ctx)
                 });
 
-            effectIdMap.values().forEach(child => {
+            Array.from(effectIdMap.values()).forEach(child => {
                 child.remove()
             });
         }
