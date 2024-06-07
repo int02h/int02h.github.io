@@ -78,7 +78,7 @@ const createEffects = function(ctx) {
         this.canApply = function (ctx) { return ctx.total_money >= price && this.isVisible(ctx) }
         this.apply = function (ctx) {
             ctx.applied_effects.push(this.id)
-            ctx.rider_per_second *= 5
+            ctx.rider_per_second *= 2
             ctx.total_money -= price
         }
     };

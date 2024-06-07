@@ -225,6 +225,9 @@
             onGameTick()
             gameTickIntervalId = setInterval(onGameTick, 1000 / tickPerSecond)
         }
+
+        function test() {
+        }
     </script>
 </head>
 <body>
@@ -253,7 +256,7 @@
     <br/>
     <br/>
     <div>
-        <button onclick="showPopup('Hello')">Tick</button>
+        <button onclick="test()">Tick</button>
     </div>
     <div>
         <button onclick="resetGame()">Reset game</button>

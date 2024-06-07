@@ -18,7 +18,7 @@ const createGameEvents = function() {
 
 		this.id = "taxi_company_license"
 		this.isReadyToOccur = function(ctx) { return !ctx.occured_events.includes(this.id) && ctx.total_driver_count >= driverAmountThreshold },
-		this.getContent = function(ctx) { return `You have more than <b>${driverAmountThreshold}</b> drivers in total. You have to purchase the taxi license to continue operations.` }
+		this.getContent = function(ctx) { return `You have more than <b>${driverAmountThreshold}</b> drivers in total. You have to purchase the taxi license for ${formatPrice(amount)} to continue operations.` }
 		this.occur = function(ctx) {
 			ctx.total_money -= amount
 			ctx.occured_events.push(this.id)
@@ -49,11 +49,22 @@ const createGameEvents = function() {
 		}
 	}
 
+	const mobileAppIsConvenient = new function() {
+		this.id = "mobile_app_is_convenient"
+		this.isReadyToOccur = function(ctx) { return !ctx.occured_events.includes(this.id) && ctx.applied_effects.includes("mobile_app") },
+		this.getContent = function(ctx) { return `Having mobile app is convenient for drivers. It becomes easier to find the new ones. The <b>hire price</b> is <b>reduced twice</b>.` }
+		this.occur = function(ctx) {
+			ctx.hire_driver_price /= 2
+			ctx.occured_events.push(this.id)
+		}
+	}
+
 	return [
 		municipalSupport,
 		taxiCompanyLicense,
 		inflation1,
-		competitorBankrupt
+		competitorBankrupt,
+		mobileAppIsConvenient
 	]
 }
 
