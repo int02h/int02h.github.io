@@ -14,10 +14,3 @@ function closePopup() {
     popupContent.innerHTML = ""
     resumeGame()
 }
-
-// Close the popup when clicking outside the popup content
-popupOverlay.addEventListener('click', function(event) {
-  if (event.target === popupOverlay) {
-    closePopup();
-  }
-});
