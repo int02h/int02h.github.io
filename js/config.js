@@ -23,7 +23,9 @@ const Config = {
         tileSize: { width: 62, height: 32 },
         canvasMargin: 100,
         extraWidth: 200,
-    }
+    },
+    animationTickPerSecond: 10,
+    calculationTickPerSecond: 5,
 }
 
 export {Config};

@@ -48,6 +48,7 @@ class Pathfinding {
         while (openSet.length > 0) {
             openSet.sort((a, b) => fScore.get(this.key(a)) - fScore.get(this.key(b)));
             const current = openSet.shift();
+
             if (current.x === end.x && current.y === end.y) {
                 return this.reconstructPath(cameFrom, current);
             }
@@ -78,13 +79,30 @@ class Pathfinding {
     reconstructPath(cameFrom, current) {
         const pathSteps = [current];
         const path = new Path();
+        const visited = new Set();
+        let iterations = 0;
+        const maxIterations = 1000;
+
         while (cameFrom.has(this.key(current))) {
+            if (iterations++ > maxIterations) {
+                console.error('Max iterations reached during path reconstruction. Potential infinite loop.');
+                break;
+            }
+
+            if (visited.has(this.key(current))) {
+                console.error('Cycle detected during path reconstruction. Exiting to prevent infinite loop.');
+                break;
+            }
+
+            visited.add(this.key(current));
+
             current = cameFrom.get(this.key(current));
             pathSteps.unshift(current);
         }
+
         path.setPath(pathSteps);
         return path;
     }
 }
 
-export {Path, Pathfinding};
+export { Path, Pathfinding };

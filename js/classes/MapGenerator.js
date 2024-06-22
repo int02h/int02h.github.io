@@ -79,6 +79,32 @@ class MapGenerator {
         }
     }
 
+    findNearestRoad(map, x, y) {
+        console.log('findNearestRoad', x, y, map[y]?.[x]?.type);
+        if (map[y]?.[x]?.type === TILE_TYPES.ROAD) {
+            return {x, y};
+        }
+
+        for (let distance = 1; distance < map.length; distance++) {
+            for (let i = -distance; i <= distance; i++) {
+                if (map[y + i]?.[x - distance]?.type === TILE_TYPES.ROAD) {
+                    return { x: x - distance, y: y + i };
+                }
+                if (map[y + i]?.[x + distance]?.type === TILE_TYPES.ROAD) {
+                    return { x: x + distance, y: y + i };
+                }
+            }
+            for (let i = -distance + 1; i < distance; i++) {
+                if (map[y - distance]?.[x + i]?.type === TILE_TYPES.ROAD) {
+                    return { x: x + i, y: y - distance };
+                }
+                if (map[y + distance]?.[x + i]?.type === TILE_TYPES.ROAD) {
+                    return { x: x + i, y: y + distance };
+                }
+            }
+        }
+    }
+
     cell(cellType) {
         return {
             type: cellType,
