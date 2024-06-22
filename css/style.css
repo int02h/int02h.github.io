@@ -6,7 +6,9 @@ body {
 }
 
 #menu {
-    width: 600px;
+    min-width: 360px;
+    max-width: 500px;
+    width: 100%;
     color: #fff;
     padding: 20px;
     padding-left: 35px;
@@ -24,7 +26,7 @@ body {
 
 h1 {
     margin: 10px 0 32px -5px;
-    font-size: 2.5em;
+    font-size: 2.2em;
 }
 
 button {
@@ -33,7 +35,7 @@ button {
     border: solid 2px #fff;
     padding: 10px 20px;
     margin: 10px 0;
-    font-size: 1em;
+    font-size: 13px;
     cursor: pointer;
     border-radius: 5px;
     font-family: "Silkscreen", sans-serif;
@@ -46,6 +48,10 @@ button:disabled {
     background-color: #555;
     color: #999;
     cursor: not-allowed;
+}
+
+button:hover {
+    background-color: #444;
 }
 
 #gameCanvas {

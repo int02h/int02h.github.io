@@ -40,7 +40,7 @@ async function initializeGame() {
     objectRenderer.drawObjects(map, isoCanvas, imageStorage);
     centerGameOnScreen(canvas);
 
-    animateTrip(map, imageStorage, mapRenderer, objectRenderer, isoCanvas, { x: 10, y: 33 }, { x: 21, y: 14 });
+    animateTrip(map, imageStorage, mapRenderer, objectRenderer, isoCanvas, { x: 19, y: 33 }, { x: 32, y: 14 });
 
     return { canvas, map, isoCanvas };
 }

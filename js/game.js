@@ -168,10 +168,13 @@ function formatAmount(amount) {
 }
 
 function formatPrice(price) {
-    if (price >= 1000) {
-        return `${price.toFixed(0)}€`
+    if (price >= 1000000) {
+        return `€${(price / 1000).toFixed(1)}M`
     }
-    return `${price.toFixed(2)}€`
+    if (price >= 1000) {
+        return `€${price.toFixed(0)}`
+    }
+    return `€${price.toFixed(2)}`
 }
 
 function saveGame() {
