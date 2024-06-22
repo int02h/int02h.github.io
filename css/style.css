@@ -23,7 +23,7 @@ body {
 }
 
 h1 {
-    margin: 10px 0 15px -5px;
+    margin: 10px 0 32px -5px;
     font-size: 2.5em;
 }
 
@@ -61,7 +61,27 @@ button:disabled {
 }
 
 .effect-button {
-    display: block;
+}
+
+#stats {
+    margin: 10px 0 30px 0;
+    font-size: 18px;
+}
+
+.stats-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.stats-value {
+    font-family: "Silkscreen", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    text-align: right;
+    flex: 0 0 auto;
 }
 
 .popup-overlay {

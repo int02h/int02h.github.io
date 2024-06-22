@@ -25,44 +25,42 @@
     <div id="menu">
         <h1 class="silkscreen-regular">Bolt Clicker</h1>
 
-        <div>Total ride count:
-            <div id="total_ride_count" class="inner-div"></div>
-        </div>
-        <div>Total money:
-            <div id="total_money" class="inner-div"></div>
-        </div>
-        <div>Ride price:
-            <div id="ride_price" class="inner-div"></div>
-        </div>
-        <div>Rider count:
-            <div id="rider_count" class="inner-div"></div>
-        </div>
-        <div>Total driver count:
-            <div id="total_driver_count" class="inner-div"></div>
-        </div>
-        <div>Available driver count:
-            <div id="available_driver_count" class="inner-div"></div>
+        <div id="stats">
+            <div class="stats-line">
+                <div>Total ride count</div>
+                <div id="total_ride_count" class="inner-div stats-value"></div>
+            </div>
+            <div class="stats-line">
+                <div>Total money:</div>
+                <div id="total_money" class="inner-div stats-value"></div>
+            </div>
+            <div class="stats-line">
+                <div>Ride price</div>
+                <div id="ride_price" class="inner-div stats-value"></div>
+            </div>
+            <div class="stats-line">
+                <div>Rider count</div>
+                <div id="rider_count" class="inner-div stats-value"></div>
+            </div>
+            <div class="stats-line">
+                <div>Total driver count</div>
+                <div id="total_driver_count" class="inner-div stats-value"></div>
+            </div>
+            <div class="stats-line">
+                <div>Available driver count</div>
+                <div id="available_driver_count" class="inner-div stats-value"></div>
+            </div>
         </div>
 
-        <br/>
-        <div>
-            <button id="invite_rider_btn">Invite rider</button>
-        </div>
-        <div>
-            <button id="start_ride_btn">Start ride</button>
-        </div>
+        <button id="invite_rider_btn">Invite rider</button>
+        <button id="start_ride_btn">Start ride</button>
 
-        <br/>
         <div id="effect_container"></div>
 
-        <br/>
-        <br/>
-        <div>
-            <button onclick="test()">Tick</button>
-        </div>
-        <div>
-            <button onclick="resetGame()">Reset game</button>
-        </div>
+        <hr/>
+        <br>
+        <button onclick="test()">Tick</button>
+        <button onclick="resetGame()">Reset game</button>
 
         <script type="text/javascript" src="js/popup.js"></script>
     </div>

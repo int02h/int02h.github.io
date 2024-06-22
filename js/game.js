@@ -107,12 +107,12 @@ function onGameTick() {
 }
 
 function updateViews() {
-    riderCountView.innerHTML = `${ctx.rider_count}`
-    totalRideCountView.innerHTML = `${ctx.total_ride_count}`
+    riderCountView.innerHTML = `${formatAmount(ctx.rider_count)}`
+    totalRideCountView.innerHTML = `${formatAmount(ctx.total_ride_count)}`
     totalMoneyView.innerHTML = `${formatPrice(ctx.total_money)}`
 
-    totalDriverCountView.innerHTML = `${ctx.total_driver_count}`
-    availableDriverCountView.innerHTML = `${ctx.available_driver_count}`
+    totalDriverCountView.innerHTML = `${formatAmount(ctx.total_driver_count)}`
+    availableDriverCountView.innerHTML = `${formatAmount(ctx.available_driver_count)}`
 
     startRideButton.disabled = !canStartRide()
     startRideButton.hidden = ctx.has_dispatcher
@@ -159,7 +159,18 @@ function canStartRide() {
     return ctx.available_driver_count > 0 && ctx.rider_count > 0
 }
 
+function formatAmount(amount) {
+    if (amount >= 1000) {
+        return `${(amount / 1000).toFixed(1)}K`
+    }
+
+    return amount.toFixed(0);
+}
+
 function formatPrice(price) {
+    if (price >= 1000) {
+        return `${price.toFixed(0)}€`
+    }
     return `${price.toFixed(2)}€`
 }
 
