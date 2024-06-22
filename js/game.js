@@ -1,74 +1,189 @@
-import ImageLoader from './classes/ImageLoader.js';
-import IsometricCanvas from "./classes/IsometricCanvas.js";
-import MapGenerator from "./classes/MapGenerator.js";
-import MapRenderer from './classes/MapRenderer.js';
-import ObjectRenderer from './classes/ObjectRenderer.js';
-import animateTrip from './trip.js';
-import { ROAD_DIRECTION_PATTERN_RULES, TILE_IMAGE_PATTERN_RULES, PatternMatcher } from './classes/PatternMatcher.js';
-import {Config} from "./config.js";
 
-const imageLoader = new ImageLoader(Config.objectTypes);
+const tickPerSecond = 10
+
+const defaultCtx = {
+    // params
+    rider_per_second: 0,
+    ride_duration_s: 5,
+
+    // counters
+    total_ride_count: 0,
+    total_money: 0,
+    rider_count_raw: 0,
+    rider_count: 0,
+    total_driver_count: 1,
+    available_driver_count: 1,
+
+    // flags
+    has_dispatcher: false,
+
+    // timestamps
+    driver_available_at: [],
+
+    // prices
+    ride_price: 1.99,
+    hire_driver_price: 10,
+
+    // effects and events
+    applied_effects: [],
+    occured_events: [],
+
+    // time
+    tick: 0
+}
+let ctx = {}
+
+const effects = createEffects()
+const gameEvents = createGameEvents()
+
+let riderCountView
+let totalRideCountView
+let totalMoneyView
+let totalDriverCountView
+let availableDriverCountView
+let effectContainerView
+let ridePriceView
+
+let inviteRiderButton
+let startRideButton
+
+let gameTickIntervalId
+let nextEventToOccur
+
+function init() {
+    riderCountView = document.getElementById("rider_count")
+    totalRideCountView = document.getElementById("total_ride_count")
+    totalMoneyView = document.getElementById("total_money")
+    totalDriverCountView = document.getElementById("total_driver_count")
+    availableDriverCountView = document.getElementById("available_driver_count")
+    inviteRiderButton = document.getElementById("invite_rider_btn")
+    startRideButton = document.getElementById("start_ride_btn")
+    effectContainerView = document.getElementById("effect_container")
+    ridePriceView = document.getElementById("ride_price")
+
+    inviteRiderButton.onclick = inviteRider
+    startRideButton.onclick = startRide
+
+    if (localStorage.game_ctx) {
+        ctx = JSON.parse(localStorage.game_ctx)
+    } else {
+        ctx = defaultCtx
+    }
+
+    resumeGame()
+    setInterval(saveGame, 1000)
+}
+
+function onGameTick() {
+    if (nextEventToOccur) {
+        nextEventToOccur.occur(ctx)
+        nextEventToOccur = null
+    }
+
+    ctx.rider_count_raw += ctx.rider_per_second / tickPerSecond
+    ctx.rider_count = Math.floor(ctx.rider_count_raw)
+
+    const finished = ctx.driver_available_at.filter(info => info.tick <= ctx.tick)
+    ctx.driver_available_at = ctx.driver_available_at.filter(info => info.tick > ctx.tick)
+
+    for (const info of finished) {
+        ctx.total_ride_count += info.amount
+        ctx.available_driver_count += info.amount
+        ctx.total_money += info.amount * ctx.ride_price
+    }
+
+    if (ctx.has_dispatcher) {
+        startRide()
+    }
+
+    updateViews()
+
+    nextEventToOccur = gameEvents.find(e => e.isReadyToOccur(ctx))
+    if (nextEventToOccur) {
+        showPopup(nextEventToOccur.getContent(ctx))
+    }
+
+    ctx.tick++
+}
+
+function updateViews() {
+    riderCountView.innerHTML = `${ctx.rider_count}`
+    totalRideCountView.innerHTML = `${ctx.total_ride_count}`
+    totalMoneyView.innerHTML = `${formatPrice(ctx.total_money)}`
+
+    totalDriverCountView.innerHTML = `${ctx.total_driver_count}`
+    availableDriverCountView.innerHTML = `${ctx.available_driver_count}`
+
+    startRideButton.disabled = !canStartRide()
+    startRideButton.hidden = ctx.has_dispatcher
+    ridePriceView.innerHTML = `${formatPrice(ctx.ride_price)}`
+
+    // effects
+    var effectIdMap = new Map()
+    for (const child of effectContainerView.children) { effectIdMap.set(child.id, child) }
+    effects.filter(e => e.isVisible(ctx))
+        .forEach(e => {
+            effectIdMap.delete(e.id)
+            let effectView = effectContainerView.querySelector(`#${e.id}`)
+            if (!effectView) {
+                effectView = document.createElement("button")
+                effectView.id = e.id
+                effectView.className = 'effect-button'
+                effectView.onclick = function() { e.apply(ctx) }
+                effectContainerView.appendChild(effectView)
+            }
+            effectView.innerHTML = e.getTitle(ctx)
+            effectView.disabled = !e.canApply(ctx)
+        });
+
+    Array.from(effectIdMap.values()).forEach(child => {
+        child.remove()
+    });
+}
+
+function inviteRider() {
+    ctx.rider_count_raw += 1
+}
+
+function startRide() {
+    if (canStartRide()) {
+        const rideCount = Math.min(ctx.rider_count, ctx.available_driver_count)
+        ctx.rider_count_raw -= rideCount
+        ctx.available_driver_count -= rideCount
+        const rideDurationTicks = ctx.ride_duration_s * tickPerSecond
+        ctx.driver_available_at.push({ tick: ctx.tick + rideDurationTicks, amount: rideCount})
+    }
+}
+
+function canStartRide() {
+    return ctx.available_driver_count > 0 && ctx.rider_count > 0
+}
+
+function formatPrice(price) {
+    return `${price.toFixed(2)}€`
+}
+
+function saveGame() {
+    localStorage.game_ctx = JSON.stringify(ctx)
+}
+
+function resetGame() {
+    ctx = defaultCtx
+    saveGame()
+}
+
+function pauseGame() {
+    clearInterval(gameTickIntervalId)
+}
+
+function resumeGame() {
+    onGameTick()
+    gameTickIntervalId = setInterval(onGameTick, 1000 / tickPerSecond)
+}
+
+function test() {
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const mapData = await initializeGame();
-    addEventListeners(mapData.canvas, mapData.map, mapData.isoCanvas);
+    init();
 });
-
-async function initializeGame() {
-    const imagePatternMatcher = new PatternMatcher(TILE_IMAGE_PATTERN_RULES);
-    const directionPatternMatcher = new PatternMatcher(ROAD_DIRECTION_PATTERN_RULES);
-    const mapGenerator = new MapGenerator(Config.map, directionPatternMatcher, Config.objectTypes);
-    const objectRenderer = new ObjectRenderer(Config.drawing.tileSize);
-    const map = mapGenerator.generateBaseMap(Config.map.neighborhoodCount);
-
-    const canvas = document.getElementById('gameCanvas');
-    setupCanvas(canvas, map);
-    const ctx = canvas.getContext('2d');
-    const isoCanvas = new IsometricCanvas(ctx, {
-        tileSize: Config.drawing.tileSize,
-        width: canvas.width,
-        height: canvas.height,
-    });
-
-    const mapRenderer = new MapRenderer(imagePatternMatcher, isoCanvas);
-    const filenames = imageLoader.collectFilenames();
-    await preloadImages(filenames);
-
-    const imageStorage = imageLoader.getImageStorage();
-    mapGenerator.fillMapMetadata(map);
-    mapRenderer.drawMap(map, imageStorage);
-    objectRenderer.drawObjects(map, isoCanvas, imageStorage);
-    centerGameOnScreen(canvas);
-
-    animateTrip(map, imageStorage, mapRenderer, objectRenderer, isoCanvas, { x: 10, y: 33 }, { x: 21, y: 14 });
-
-    return { canvas, map, isoCanvas };
-}
-
-function setupCanvas(canvas, map) {
-    canvas.width = map[0].length * Config.drawing.tileSize.width + Config.drawing.canvasMargin + Config.drawing.extraWidth;
-    canvas.height = map.length * Config.drawing.tileSize.height + Config.drawing.canvasMargin;
-}
-
-function preloadImages(filenames) {
-    return new Promise((resolve, reject) => {
-        imageLoader.preloadImages(filenames, () => {
-            resolve();
-        });
-    });
-}
-
-function centerGameOnScreen(canvas) {
-    const gameWrapper = document.getElementById('game-container');
-    document.scrollingElement.scrollLeft = (canvas.width - gameWrapper.clientWidth) / 2;
-}
-
-function addEventListeners(canvas, map, isoCanvas) {
-    canvas.addEventListener('click', (event) => {
-        const rect = canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-        const mapCoords = isoCanvas.canvasToMapCoords(x, y);
-        console.log('Map Coordinates:', mapCoords);
-    });
-}

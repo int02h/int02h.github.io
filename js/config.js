@@ -1,6 +1,6 @@
 const Config = {
     map: {
-        neighborhoodCount: 9,
+        neighborhoodCount: 16,
         neighborhoodSize: 6,
         sidewalkSize: 1,
         roadSize: 2,

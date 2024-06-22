@@ -2,237 +2,16 @@
 <html lang="en">
 
 <head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <style>
-        .outer-div {
-        }
-
-        .inner-div {
-            display: inline-block;
-        }
-
-        .effect-button {
-            display: block;
-        }
-
-        .popup-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: none;
-        }
-
-        .popup {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #f9f9f9;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .close {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            cursor: pointer;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bolt Clicker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
     <script type="text/javascript" src="js/effects.js"></script>
     <script type="text/javascript" src="js/game-events.js"></script>
-    <script type="text/javascript">
-
-        const tickPerSecond = 10
-
-        const defaultCtx = {
-            // params
-            rider_per_second: 0,
-            ride_duration_s: 5,
-
-            // counters
-            total_ride_count: 0,
-            total_money: 0,
-            rider_count_raw: 0,
-            rider_count: 0,
-            total_driver_count: 1,
-            available_driver_count: 1,
-
-            // flags
-            has_dispatcher: false,
-
-            // timestamps
-            driver_available_at: [],
-
-            // prices
-            ride_price: 1.99,
-            hire_driver_price: 10,
-
-            // effects and events
-            applied_effects: [],
-            occured_events: [],
-
-            // time
-            tick: 0
-        }
-        let ctx = {}
-
-        const effects = createEffects()
-        const gameEvents = createGameEvents()
-
-        let riderCountView
-        let totalRideCountView
-        let totalMoneyView
-        let totalDriverCountView
-        let availableDriverCountView
-        let effectContainerView
-        let ridePriceView
-
-        let inviteRiderButton
-        let startRideButton
-
-        let gameTickIntervalId
-        let nextEventToOccur
-
-        function init() {
-            riderCountView = document.getElementById("rider_count")
-            totalRideCountView = document.getElementById("total_ride_count")
-            totalMoneyView = document.getElementById("total_money")
-            totalDriverCountView = document.getElementById("total_driver_count")
-            availableDriverCountView = document.getElementById("available_driver_count")
-            inviteRiderButton = document.getElementById("invite_rider_btn")
-            startRideButton = document.getElementById("start_ride_btn")
-            effectContainerView = document.getElementById("effect_container")
-            ridePriceView = document.getElementById("ride_price")
-
-            inviteRiderButton.onclick = inviteRider
-            startRideButton.onclick = startRide
-
-            if (localStorage.game_ctx) {
-                ctx = JSON.parse(localStorage.game_ctx)
-            } else {
-                ctx = defaultCtx
-            }
-
-            resumeGame()
-            setInterval(saveGame, 1000)
-        }
-
-        function onGameTick() {
-            if (nextEventToOccur) {
-                nextEventToOccur.occur(ctx)
-                nextEventToOccur = null
-            }
-
-            ctx.rider_count_raw += ctx.rider_per_second / tickPerSecond
-            ctx.rider_count = Math.floor(ctx.rider_count_raw)
-
-            const finished = ctx.driver_available_at.filter(info => info.tick <= ctx.tick)
-            ctx.driver_available_at = ctx.driver_available_at.filter(info => info.tick > ctx.tick)
-
-            for (const info of finished) {
-                ctx.total_ride_count += info.amount
-                ctx.available_driver_count += info.amount
-                ctx.total_money += info.amount * ctx.ride_price
-            }
-
-            if (ctx.has_dispatcher) {
-                startRide()
-            }
-
-            updateViews()
-
-            nextEventToOccur = gameEvents.find(e => e.isReadyToOccur(ctx))
-            if (nextEventToOccur) {
-                showPopup(nextEventToOccur.getContent(ctx))
-            }
-
-            ctx.tick++
-        }
-
-        function updateViews() {
-            riderCountView.innerHTML = `${ctx.rider_count}`
-            totalRideCountView.innerHTML = `${ctx.total_ride_count}`
-            totalMoneyView.innerHTML = `${formatPrice(ctx.total_money)}`
-
-            totalDriverCountView.innerHTML = `${ctx.total_driver_count}`
-            availableDriverCountView.innerHTML = `${ctx.available_driver_count}`
-
-            startRideButton.disabled = !canStartRide()
-            startRideButton.hidden = ctx.has_dispatcher
-            ridePriceView.innerHTML = `${formatPrice(ctx.ride_price)}`
-
-            // effects
-            var effectIdMap = new Map()
-            for (const child of effectContainerView.children) { effectIdMap.set(child.id, child) }
-            effects.filter(e => e.isVisible(ctx))
-                .forEach(e => {
-                    effectIdMap.delete(e.id)
-                    let effectView = effectContainerView.querySelector(`#${e.id}`)
-                    if (!effectView) {
-                        effectView = document.createElement("button")
-                        effectView.id = e.id
-                        effectView.className = 'effect-button'
-                        effectView.onclick = function() { e.apply(ctx) }
-                        effectContainerView.appendChild(effectView)
-                    }
-                    effectView.innerHTML = e.getTitle(ctx)
-                    effectView.disabled = !e.canApply(ctx)
-                });
-
-            Array.from(effectIdMap.values()).forEach(child => {
-                child.remove()
-            });
-        }
-
-        function inviteRider() {
-            ctx.rider_count_raw += 1
-        }
-
-        function startRide() {
-            if (canStartRide()) {
-                const rideCount = Math.min(ctx.rider_count, ctx.available_driver_count)
-                ctx.rider_count_raw -= rideCount
-                ctx.available_driver_count -= rideCount
-                const rideDurationTicks = ctx.ride_duration_s * tickPerSecond
-                ctx.driver_available_at.push({ tick: ctx.tick + rideDurationTicks, amount: rideCount})
-            }
-        }
-
-        function canStartRide() {
-            return ctx.available_driver_count > 0 && ctx.rider_count > 0
-        }
-
-        function formatPrice(price) {
-            return `${price.toFixed(2)}€`
-        }
-
-        function saveGame() {
-            localStorage.game_ctx = JSON.stringify(ctx)
-        }
-
-        function resetGame() {
-            ctx = defaultCtx
-            saveGame()
-        }
-
-        function pauseGame() {
-            clearInterval(gameTickIntervalId)
-        }
-
-        function resumeGame() {
-            onGameTick()
-            gameTickIntervalId = setInterval(onGameTick, 1000 / tickPerSecond)
-        }
-
-        function test() {
-        }
-    </script>
+    <script type="text/javascript" src="js/game.js"></script>
 </head>
 <body>
     <div class="popup-overlay" id="popup-overlay">
@@ -243,32 +22,53 @@
         </div>
     </div>
 
-    <div>Total ride count: <div id="total_ride_count" class="inner-div"></div></div>
-    <div>Total money: <div id="total_money" class="inner-div"></div></div>
-    <div>Ride price: <div id="ride_price" class="inner-div"></div></div>
-    <div>Rider count: <div id="rider_count" class="inner-div"></div></div>
-    <div>Total driver count: <div id="total_driver_count" class="inner-div"></div></div>
-    <div>Available driver count: <div id="available_driver_count" class="inner-div"></div></div>
+    <div id="menu">
+        <h1 class="silkscreen-regular">Bolt Clicker</h1>
 
-    <br/>
-    <div><button id="invite_rider_btn">Invite rider</button></div>
-    <div><button id="start_ride_btn">Start ride</button></div>
+        <div>Total ride count:
+            <div id="total_ride_count" class="inner-div"></div>
+        </div>
+        <div>Total money:
+            <div id="total_money" class="inner-div"></div>
+        </div>
+        <div>Ride price:
+            <div id="ride_price" class="inner-div"></div>
+        </div>
+        <div>Rider count:
+            <div id="rider_count" class="inner-div"></div>
+        </div>
+        <div>Total driver count:
+            <div id="total_driver_count" class="inner-div"></div>
+        </div>
+        <div>Available driver count:
+            <div id="available_driver_count" class="inner-div"></div>
+        </div>
 
-    <br/>
-    <div id="effect_container"></div>
+        <br/>
+        <div>
+            <button id="invite_rider_btn">Invite rider</button>
+        </div>
+        <div>
+            <button id="start_ride_btn">Start ride</button>
+        </div>
 
-    <br/>
-    <br/>
-    <div>
-        <button onclick="test()">Tick</button>
+        <br/>
+        <div id="effect_container"></div>
+
+        <br/>
+        <br/>
+        <div>
+            <button onclick="test()">Tick</button>
+        </div>
+        <div>
+            <button onclick="resetGame()">Reset game</button>
+        </div>
+
+        <script type="text/javascript" src="js/popup.js"></script>
     </div>
-    <div>
-        <button onclick="resetGame()">Reset game</button>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
     </div>
-
-    <script type="text/javascript" src="js/popup.js"></script>
-    <script type="text/javascript">
-        init()
-    </script>
+    <script type="module" src="js/map.js"></script>
 </body>
 </html>
