@@ -1,8 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <style>
         .outer-div {
         }
-        
+
         .inner-div {
             display: inline-block;
         }
@@ -40,8 +44,8 @@
             cursor: pointer;
         }
     </style>
-    <script type="text/javascript" src="effects.js"></script>
-    <script type="text/javascript" src="game-events.js"></script>
+    <script type="text/javascript" src="js/effects.js"></script>
+    <script type="text/javascript" src="js/game-events.js"></script>
     <script type="text/javascript">
 
         const tickPerSecond = 10
@@ -101,7 +105,7 @@
             totalMoneyView = document.getElementById("total_money")
             totalDriverCountView = document.getElementById("total_driver_count")
             availableDriverCountView = document.getElementById("available_driver_count")
-            inviteRiderButton = document.getElementById("invite_rider_btn") 
+            inviteRiderButton = document.getElementById("invite_rider_btn")
             startRideButton = document.getElementById("start_ride_btn")
             effectContainerView = document.getElementById("effect_container")
             ridePriceView = document.getElementById("ride_price")
@@ -158,7 +162,7 @@
 
             totalDriverCountView.innerHTML = `${ctx.total_driver_count}`
             availableDriverCountView.innerHTML = `${ctx.available_driver_count}`
-            
+
             startRideButton.disabled = !canStartRide()
             startRideButton.hidden = ctx.has_dispatcher
             ridePriceView.innerHTML = `${formatPrice(ctx.ride_price)}`
@@ -245,7 +249,7 @@
     <div>Rider count: <div id="rider_count" class="inner-div"></div></div>
     <div>Total driver count: <div id="total_driver_count" class="inner-div"></div></div>
     <div>Available driver count: <div id="available_driver_count" class="inner-div"></div></div>
-    
+
     <br/>
     <div><button id="invite_rider_btn">Invite rider</button></div>
     <div><button id="start_ride_btn">Start ride</button></div>
@@ -262,8 +266,9 @@
         <button onclick="resetGame()">Reset game</button>
     </div>
 
-    <script type="text/javascript" src="popup.js"></script>
+    <script type="text/javascript" src="js/popup.js"></script>
     <script type="text/javascript">
         init()
     </script>
 </body>
+</html>
