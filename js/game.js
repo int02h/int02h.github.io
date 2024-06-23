@@ -169,7 +169,7 @@ function formatAmount(amount) {
 
 function formatPrice(price) {
     if (price >= 1000000) {
-        return `€${(price / 1000).toFixed(1)}M`
+        return `€${(price / 1000000).toFixed(1)}M`
     }
     if (price >= 1000) {
         return `€${price.toFixed(0)}`

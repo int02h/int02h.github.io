@@ -2,19 +2,21 @@ import {Pathfinding} from "./Path.js";
 import Car from "./Car.js";
 
 class Trip {
-    constructor(from, to, map) {
+    carStrategy = {
+        taxi: new TaxiTripCar(),
+        private: new PrivateTripCar(),
+    }
+
+    constructor(from, to, map, options = {}) {
+        const carType = options.carType ?? 'private';
+
         this.from = from;
         this.to = to;
 
         const pathfinding = new Pathfinding(map);
-        this.path = pathfinding.findShortestPath(this.from, this.to);
-        this.car = new Car(from, {
-            up: 'assets/objects/car-up.png',
-            right: 'assets/objects/car-right.png',
-            down: 'assets/objects/car-down.png',
-            left: 'assets/objects/car-left.png',
-        });
-        console.log("Path", this.path);
+        this.path = pathfinding.findShortestPath(this.from, this.to, options);
+        this.car = new Car(from, this.carStrategy[carType].getImages());
+        console.log("Path!!!", this.path);
         this.car.setPath(this.path);
     }
 
@@ -26,6 +28,28 @@ class Trip {
 
     isFinished() {
         return this.car.isAtDestination();
+    }
+}
+
+class TaxiTripCar {
+    getImages() {
+        return {
+            up: 'assets/objects/taxi-car-up.png',
+            right: 'assets/objects/taxi-car-right.png',
+            down: 'assets/objects/taxi-car-down.png',
+            left: 'assets/objects/taxi-car-left.png',
+        };
+    }
+}
+
+class PrivateTripCar {
+    getImages() {
+        return {
+            up: 'assets/objects/private-car-up.png',
+            right: 'assets/objects/private-car-right.png',
+            down: 'assets/objects/private-car-down.png',
+            left: 'assets/objects/private-car-left.png',
+        };
     }
 }
 

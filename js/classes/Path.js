@@ -39,7 +39,7 @@ class Pathfinding {
         return tile && tile.type === TILE_TYPES.ROAD && tile.properties.possibleDirections.includes(fromDirection);
     }
 
-    findShortestPath(start, end) {
+    findShortestPath(start, end, options = {}) {
         const openSet = [start];
         const cameFrom = new Map();
         const gScore = new Map([[this.key(start), 0]]);
@@ -50,7 +50,7 @@ class Pathfinding {
             const current = openSet.shift();
 
             if (current.x === end.x && current.y === end.y) {
-                return this.reconstructPath(cameFrom, current);
+                return this.reconstructPath(cameFrom, current, options);
             }
 
             for (const direction of Object.values(this.directions)) {
@@ -76,12 +76,15 @@ class Pathfinding {
         return `${point.x},${point.y}`;
     }
 
-    reconstructPath(cameFrom, current) {
+    reconstructPath(cameFrom, current, options = {}) {
         const pathSteps = [current];
         const path = new Path();
         const visited = new Set();
         let iterations = 0;
         const maxIterations = 1000;
+
+        const fromIdleSteps = options.fromIdleSteps || 0;
+        const toIdleSteps = options.toIdleSteps || 0;
 
         while (cameFrom.has(this.key(current))) {
             if (iterations++ > maxIterations) {
@@ -98,6 +101,24 @@ class Pathfinding {
 
             current = cameFrom.get(this.key(current));
             pathSteps.unshift(current);
+        }
+
+        for (let i = 0; i < fromIdleSteps; i++) {
+            console.log("Adding idle steps");
+            pathSteps.unshift({ x: pathSteps[0].x, y: pathSteps[0].y, direction: pathSteps[0].direction });
+        }
+        if (toIdleSteps > 0) {
+            if (!pathSteps[pathSteps.length - 1].direction) {
+                pathSteps[pathSteps.length - 1].direction =  pathSteps[pathSteps.length - 2]?.direction;
+            }
+
+            for (let i = 0; i < toIdleSteps; i++) {
+                pathSteps.push({
+                    x: pathSteps[pathSteps.length - 1].x,
+                    y: pathSteps[pathSteps.length - 1].y,
+                    direction: pathSteps[pathSteps.length - 1]?.direction,
+                });
+            }
         }
 
         path.setPath(pathSteps);

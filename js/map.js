@@ -53,8 +53,11 @@ async function initializeGame() {
     centerGameOnScreen(canvas);
 
     trips.push(new Trip({ x: 19, y: 33 }, { x: 32, y: 14 }, map.map));
+    setInterval(() => {
+        trips.push(createRandomTrip());
+    }, 1000);
 
-    return { canvas, map: map.map, isoCanvas };
+    return { canvas, map, isoCanvas };
 }
 
 function setupCanvas(canvas, map) {
@@ -94,22 +97,44 @@ function onMapCalculationTick() {
     trips = trips.filter(trip => !trip.isFinished());
 }
 
+function createRandomTrip() {
+    const retries = 5;
+    for (let i = 0; i < retries; i++) {
+        try {
+            const start = map.getRandomRoadTile();
+            const finish = map.getRandomRoadTile();
+            const trip = new Trip(start, finish, map.map, {
+                fromIdleSteps: 1,
+                toIdleSteps: 1,
+            });
+            if (trip.path.path.length > 0) {
+                return trip;
+            }
+        } catch (error) {
+        }
+    }
+}
+
 function addEventListeners(canvas, map, isoCanvas) {
     canvas.addEventListener('click', (event) => {
-        const rect = canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-        const mapCoords = isoCanvas.canvasToMapCoords(x, y);
+        // const rect = canvas.getBoundingClientRect();
+        // const x = event.clientX - rect.left;
+        // const y = event.clientY - rect.top;
+        // const mapCoords = isoCanvas.canvasToMapCoords(x, y);
 
-        const start = mapGenerator.findNearestRoad(map, mapCoords.x, mapCoords.y);
-        const finish = mapGenerator.findNearestRoad(map,
-            Math.floor(Math.random() * map[0].length),
-            Math.floor(Math.random() * map.length)
-        );
+        for (let i = 0; i < 10; i++) {
+            const start = map.getRandomRoadTile();
+            const finish = map.getRandomRoadTile();
+            const trip = new Trip(start, finish, map.map, {
+                fromIdleSteps: 1,
+                toIdleSteps: 1,
+            });
+            if (trip.path.path.length > 0) {
+                trips.push(trip);
+            }
+        }
 
-        trips.push(new Trip(start, finish, map));
-
-        console.log('Map Coordinates:', mapCoords);
-        console.log('Nearest road:', start);
+        // console.log('Map Coordinates:', mapCoords);
+        // console.log('Nearest road:', start);
     });
 }

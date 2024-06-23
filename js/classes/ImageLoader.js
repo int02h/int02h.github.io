@@ -24,10 +24,14 @@ class ImageLoader {
             filenames.add(`assets/objects/${type}`);
         });
 
-        filenames.add('assets/objects/car-up.png');
-        filenames.add('assets/objects/car-down.png');
-        filenames.add('assets/objects/car-left.png');
-        filenames.add('assets/objects/car-right.png');
+        filenames.add('assets/objects/taxi-car-up.png');
+        filenames.add('assets/objects/taxi-car-down.png');
+        filenames.add('assets/objects/taxi-car-left.png');
+        filenames.add('assets/objects/taxi-car-right.png');
+        filenames.add('assets/objects/private-car-up.png');
+        filenames.add('assets/objects/private-car-down.png');
+        filenames.add('assets/objects/private-car-left.png');
+        filenames.add('assets/objects/private-car-right.png');
 
         filenames.add('assets/objects/car.png');
         filenames.add('assets/tiles/grass-alt.png');
