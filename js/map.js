@@ -1,10 +1,10 @@
 import ImageLoader from './classes/ImageLoader.js';
 import IsometricCanvas from "./classes/IsometricCanvas.js";
-import MapGenerator from "./classes/MapGenerator.js";
+import {MapGenerator} from "./classes/MapGenerator.js";
 import MapRenderer from './classes/MapRenderer.js';
 import ObjectRenderer from './classes/ObjectRenderer.js';
 import Trip from './classes/Trip.js';
-import { ROAD_DIRECTION_PATTERN_RULES, TILE_IMAGE_PATTERN_RULES, PatternMatcher } from './classes/PatternMatcher.js';
+import {ROAD_DIRECTION_PATTERN_RULES, TILE_IMAGE_PATTERN_RULES, PatternMatcher} from './classes/PatternMatcher.js';
 import {Config} from "./config.js";
 
 let imageLoader = new ImageLoader(Config.objectTypes);
@@ -34,7 +34,7 @@ async function initializeGame() {
     map = mapGenerator.generateBaseMap(Config.map.neighborhoodCount);
 
     const canvas = document.getElementById('gameCanvas');
-    setupCanvas(canvas, map);
+    setupCanvas(canvas, map.map);
     const ctx = canvas.getContext('2d');
     isoCanvas = new IsometricCanvas(ctx, {
         tileSize: Config.drawing.tileSize,
@@ -47,14 +47,14 @@ async function initializeGame() {
     await preloadImages(filenames);
 
     imageStorage = imageLoader.getImageStorage();
-    mapGenerator.fillMapMetadata(map);
-    mapRenderer.drawMap(map, imageStorage);
-    objectRenderer.drawObjects(map, isoCanvas, imageStorage);
+    mapGenerator.fillMapMetadata(map.map);
+    mapRenderer.drawMap(map.map, imageStorage);
+    objectRenderer.drawObjects(map.map, isoCanvas, imageStorage);
     centerGameOnScreen(canvas);
 
-    trips.push(new Trip({ x: 19, y: 33 }, { x: 32, y: 14 }, map));
+    trips.push(new Trip({ x: 19, y: 33 }, { x: 32, y: 14 }, map.map));
 
-    return { canvas, map, isoCanvas };
+    return { canvas, map: map.map, isoCanvas };
 }
 
 function setupCanvas(canvas, map) {
@@ -76,7 +76,7 @@ function centerGameOnScreen(canvas) {
 }
 
 function onMapAnimationTick() {
-    mapRenderer?.drawMap(map, imageStorage);
+    mapRenderer?.drawMap(map.map, imageStorage);
 
     for (let trip of trips) {
         const car = trip.car;
@@ -84,7 +84,7 @@ function onMapAnimationTick() {
         isoCanvas?.draw(car.position.x, car.position.y, carImage);
     }
 
-    objectRenderer?.drawObjects(map, isoCanvas, imageStorage);
+    objectRenderer?.drawObjects(map.map, isoCanvas, imageStorage);
 }
 
 function onMapCalculationTick() {
