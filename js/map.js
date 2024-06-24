@@ -55,7 +55,7 @@ async function initializeGame() {
     trips.push(new Trip({ x: 19, y: 33 }, { x: 32, y: 14 }, map.map));
     setInterval(() => {
         trips.push(createRandomTrip());
-    }, 1000);
+    }, 500);
 
     return { canvas, map, isoCanvas };
 }
@@ -81,20 +81,30 @@ function centerGameOnScreen(canvas) {
 function onMapAnimationTick() {
     mapRenderer?.drawMap(map.map, imageStorage);
 
-    for (let trip of trips) {
-        const car = trip.car;
-        const carImage = imageStorage[car.getImage()];
-        isoCanvas?.draw(car.position.x, car.position.y, carImage);
+    for (let trip of trips.filter(trip => !!trip)) {
+        try {
+            const car = trip.car;
+            const carImage = imageStorage[car.getImage()];
+            isoCanvas?.draw(car.position.x, car.position.y, carImage);
+        } catch (error) {
+            console.log(trips);
+            console.warn('Error rendering trip:', error);
+        }
     }
 
     objectRenderer?.drawObjects(map.map, isoCanvas, imageStorage);
 }
 
 function onMapCalculationTick() {
-    for (let trip of trips) {
-        trip.move();
+    for (let trip of trips.filter(trip => !!trip)) {
+        try {
+            trip.move();
+        } catch (error) {
+            console.log(trips);
+            console.warn('Error calculating trip:', error);
+        }
     }
-    trips = trips.filter(trip => !trip.isFinished());
+    trips = trips.filter(trip => !trip?.isFinished());
 }
 
 function createRandomTrip() {

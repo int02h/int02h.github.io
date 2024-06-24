@@ -93,7 +93,7 @@ class Pathfinding {
             }
 
             if (visited.has(this.key(current))) {
-                console.error('Cycle detected during path reconstruction. Exiting to prevent infinite loop.');
+                console.warn('Cycle detected during path reconstruction. Exiting to prevent infinite loop.');
                 break;
             }
 
@@ -104,7 +104,6 @@ class Pathfinding {
         }
 
         for (let i = 0; i < fromIdleSteps; i++) {
-            console.log("Adding idle steps");
             pathSteps.unshift({ x: pathSteps[0].x, y: pathSteps[0].y, direction: pathSteps[0].direction });
         }
         if (toIdleSteps > 0) {
