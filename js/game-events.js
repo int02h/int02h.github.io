@@ -12,24 +12,11 @@ const createGameEvents = function() {
 		}
 	}
 
-	const taxiCompanyLicense = new function() {
-		const amount = 1500
-		const driverAmountThreshold = 50
-
-		this.id = "taxi_company_license"
-		this.isReadyToOccur = function(ctx) { return !ctx.occured_events.includes(this.id) && ctx.total_driver_count >= driverAmountThreshold },
-		this.getContent = function(ctx) { return `You have more than <b>${driverAmountThreshold}</b> drivers in total. You have to purchase the taxi license for ${formatPrice(amount)} to continue operations.` }
-		this.occur = function(ctx) {
-			ctx.total_money -= amount
-			ctx.occured_events.push(this.id)
-		}
-	}
-
 	const inflation1 = new function() {
 		const newRidePrice = 2.99
 
 		this.id = "inflation1"
-		this.isReadyToOccur = function(ctx) { return !ctx.occured_events.includes(this.id) && ctx.total_ride_count >= 500 },
+		this.isReadyToOccur = function(ctx) { return !ctx.occured_events.includes(this.id) && ctx.total_ride_count >= 700 },
 		this.getContent = function(ctx) { return `The inflation does its job. The new ride price is <b>${formatPrice(newRidePrice)}</b>` }
 		this.occur = function(ctx) {
 			ctx.ride_price = newRidePrice
@@ -61,7 +48,6 @@ const createGameEvents = function() {
 
 	return [
 		municipalSupport,
-		taxiCompanyLicense,
 		inflation1,
 		competitorBankrupt,
 		mobileAppIsConvenient

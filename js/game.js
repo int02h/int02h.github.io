@@ -13,6 +13,7 @@ const defaultCtx = {
     rider_count: 0,
     total_driver_count: 1,
     available_driver_count: 1,
+    allowed_driver_count: 1,
 
     // flags
     has_dispatcher: false,
@@ -41,6 +42,7 @@ let totalRideCountView
 let totalMoneyView
 let totalDriverCountView
 let availableDriverCountView
+let allowedDriverCountView
 let effectContainerView
 let ridePriceView
 
@@ -56,6 +58,7 @@ function init() {
     totalMoneyView = document.getElementById("total_money")
     totalDriverCountView = document.getElementById("total_driver_count")
     availableDriverCountView = document.getElementById("available_driver_count")
+    allowedDriverCountView = document.getElementById("allowed_driver_count")
     inviteRiderButton = document.getElementById("invite_rider_btn")
     startRideButton = document.getElementById("start_ride_btn")
     effectContainerView = document.getElementById("effect_container")
@@ -113,13 +116,14 @@ function updateViews() {
 
     totalDriverCountView.innerHTML = `${formatAmount(ctx.total_driver_count)}`
     availableDriverCountView.innerHTML = `${formatAmount(ctx.available_driver_count)}`
+    allowedDriverCountView.innerHTML = `${formatAmount(ctx.allowed_driver_count)}`
 
     startRideButton.disabled = !canStartRide()
     startRideButton.hidden = ctx.has_dispatcher
     ridePriceView.innerHTML = `${formatPrice(ctx.ride_price)}`
 
     // effects
-    var effectIdMap = new Map()
+    const effectIdMap = new Map();
     for (const child of effectContainerView.children) { effectIdMap.set(child.id, child) }
     effects.filter(e => e.isVisible(ctx))
         .forEach(e => {
