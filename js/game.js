@@ -188,6 +188,7 @@ function saveGame() {
 function resetGame() {
     ctx = defaultCtx
     saveGame()
+    localStorage.game_map = "";
 }
 
 function pauseGame() {

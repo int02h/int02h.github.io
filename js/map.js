@@ -1,6 +1,7 @@
+import {cloneDeep} from 'https://esm.sh/lodash-es@4.17.21';
 import ImageLoader from './classes/ImageLoader.js';
 import IsometricCanvas from "./classes/IsometricCanvas.js";
-import {MapGenerator} from "./classes/MapGenerator.js";
+import {GameMap, MapGenerator} from "./classes/MapGenerator.js";
 import MapRenderer from './classes/MapRenderer.js';
 import ObjectRenderer from './classes/ObjectRenderer.js';
 import Trip from './classes/Trip.js';
@@ -31,7 +32,23 @@ async function initializeGame() {
     directionPatternMatcher = new PatternMatcher(ROAD_DIRECTION_PATTERN_RULES);
     mapGenerator = new MapGenerator(Config.map, directionPatternMatcher, Config.objectTypes);
     objectRenderer = new ObjectRenderer(Config.drawing.tileSize);
-    map = mapGenerator.generateBaseMap(Config.map.neighborhoodCount);
+
+    const savedGameMap = localStorage.game_map;
+    if (!!savedGameMap) {
+        try {
+            map = deserializeGameMap(savedGameMap)
+            console.log(map);
+        } catch (error) {
+            console.warn('Error parsing map from local storage:', error);
+            map = mapGenerator.generateBaseMap(Config.map.neighborhoodCount);
+            mapGenerator.fillMapMetadata(map.map);
+            localStorage.game_map = serializeGameMap(map);
+        }
+    } else {
+        map = mapGenerator.generateBaseMap(Config.map.neighborhoodCount);
+        mapGenerator.fillMapMetadata(map.map);
+        localStorage.game_map = serializeGameMap(map);
+    }
 
     const canvas = document.getElementById('gameCanvas');
     setupCanvas(canvas, map.map);
@@ -47,7 +64,6 @@ async function initializeGame() {
     await preloadImages(filenames);
 
     imageStorage = imageLoader.getImageStorage();
-    mapGenerator.fillMapMetadata(map.map);
     mapRenderer.drawMap(map.map, imageStorage);
     objectRenderer.drawObjects(map.map, isoCanvas, imageStorage);
     centerGameOnScreen(canvas);
@@ -100,7 +116,6 @@ function onMapCalculationTick() {
         try {
             trip.move();
         } catch (error) {
-            console.log(trips);
             console.warn('Error calculating trip:', error);
         }
     }
@@ -147,4 +162,16 @@ function addEventListeners(canvas, map, isoCanvas) {
         // console.log('Map Coordinates:', mapCoords);
         // console.log('Nearest road:', start);
     });
+}
+
+function serializeGameMap(gameMap) {
+    const clonedMap = cloneDeep(gameMap);
+    clonedMap.roadTiles = Array.from(clonedMap.roadTiles);
+    return JSON.stringify(clonedMap);
+}
+
+function deserializeGameMap(gameMap) {
+    const parsedMap = JSON.parse(gameMap);
+    parsedMap.roadTiles = new Set(parsedMap.roadTiles);
+    return new GameMap(parsedMap.size, parsedMap.map, parsedMap.roadTiles);
 }

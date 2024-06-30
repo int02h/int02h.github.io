@@ -1,10 +1,10 @@
 import {TILE_TYPES} from './PatternMatcher.js';
 
-class Map {
-    constructor(size) {
+class GameMap {
+    constructor(size, map = undefined, roadTiles = undefined) {
         this.size = size;
-        this.map = Map.emptyMapTiles(size);
-        this.roadTiles = new Set();
+        this.map = map ?? GameMap.emptyMapTiles(size);
+        this.roadTiles = roadTiles ?? new Set();
     }
 
     getTile(x, y) {
@@ -32,6 +32,21 @@ class Map {
 }
 
 class MapGenerator {
+    static neighborhoodType = {
+        house: {
+            probability: 0.6,
+            variants: 7,
+        },
+        parking: {
+            probability: 0.3,
+            variants: 3,
+        },
+        park: {
+            probability: 0.1,
+            variants: 1,
+        },
+    };
+
     constructor(mapConfig, patternMatcher, objectTypes) {
         this.mapConfig = mapConfig;
         this.patternMatcher = patternMatcher;
@@ -42,7 +57,7 @@ class MapGenerator {
         const mapSize = Math.ceil(Math.sqrt(neighborhoodCount));
         const totalNeighborhoodSize = mapSize * (this.mapConfig.neighborhoodSize + this.mapConfig.sidewalkSize * 2 + this.mapConfig.roadSize) + this.mapConfig.roadSize + this.mapConfig.borderSize * 2;
 
-        const map = new Map(totalNeighborhoodSize);
+        const map = new GameMap(totalNeighborhoodSize);
 
         for (let i = 0; i < mapSize; i++) {
             for (let j = 0; j < mapSize; j++) {
@@ -102,7 +117,7 @@ class MapGenerator {
                     }
                 }
                 if (cell.type === TILE_TYPES.NEIGHBORHOOD) {
-                    cell.properties.imageSrc = `assets/objects/${this.objectTypes[Math.floor(Math.random() * this.objectTypes.length)]}`;
+                    cell.properties.imageSrc = `assets/objects/${cell.properties.neighborhoodType}-${cell.properties.neighborhoodVariant}.png`;
                 }
             }
         }
@@ -135,6 +150,19 @@ class MapGenerator {
     }
 
     static cell(cellType) {
+        if (cellType === TILE_TYPES.NEIGHBORHOOD) {
+            const neighborhood = MapGenerator.randomNeighborhood();
+            return {
+                type: cellType,
+                properties: {
+                    neighborhoodType: neighborhood.type,
+                    neighborhoodVariant: neighborhood.variant,
+                    possibleDirections: [],
+                    imageSrc: 'assets/objects/house.png',
+                },
+            };
+        }
+
         return {
             type: cellType,
             properties: {
@@ -143,6 +171,20 @@ class MapGenerator {
             },
         };
     }
+
+    static randomNeighborhood() {
+        const random = Math.random();
+        let sum = 0;
+        for (const [type, { probability }] of Object.entries(MapGenerator.neighborhoodType)) {
+            sum += probability;
+            if (random < sum) {
+                const variant = Math.floor(Math.random() * MapGenerator.neighborhoodType[type].variants);
+                return {type, variant};
+            }
+        }
+        console.error("a48d4217-8521-46b5-84f5-b4884ba3baad", "unexpected random value to be greater than ", sum);
+        return undefined;
+    }
 }
 
-export {MapGenerator, Map};
+export {MapGenerator, GameMap};

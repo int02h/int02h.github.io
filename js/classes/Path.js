@@ -88,7 +88,7 @@ class Pathfinding {
 
         while (cameFrom.has(this.key(current))) {
             if (iterations++ > maxIterations) {
-                console.error('Max iterations reached during path reconstruction. Potential infinite loop.');
+                console.warn('Max iterations reached during path reconstruction. Potential infinite loop.');
                 break;
             }
 
