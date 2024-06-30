@@ -59,6 +59,9 @@ class MapGenerator {
 
         const map = new GameMap(totalNeighborhoodSize);
 
+        const allowedStoresAmount = 3;
+        let storesUsed = 0;
+
         for (let i = 0; i < mapSize; i++) {
             for (let j = 0; j < mapSize; j++) {
                 const neighborhoodStartY = this.mapConfig.borderSize + i * (this.mapConfig.neighborhoodSize + this.mapConfig.sidewalkSize * 2 + this.mapConfig.roadSize) + this.mapConfig.roadSize + this.mapConfig.sidewalkSize;
@@ -76,6 +79,14 @@ class MapGenerator {
                             map.setTile(neighborhoodStartX + l, neighborhoodStartY + k, MapGenerator.cell(TILE_TYPES.NEIGHBORHOOD));
                         }
                     }
+                }
+                if (Math.random() > 0.74 && storesUsed < allowedStoresAmount) {
+                    map.setTile(
+                        neighborhoodStartX + this.mapConfig.neighborhoodSize - 2,
+                        neighborhoodStartY + this.mapConfig.neighborhoodSize - 2,
+                        MapGenerator.cell(TILE_TYPES.NEIGHBORHOOD, { neighborhoodType: 'shop', neighborhoodVariant: 0 }),
+                    );
+                    storesUsed++;
                 }
 
                 for (let y = -1; y <= this.mapConfig.neighborhoodSize; y++) {
@@ -149,14 +160,14 @@ class MapGenerator {
         }
     }
 
-    static cell(cellType) {
+    static cell(cellType, properties = {}) {
         if (cellType === TILE_TYPES.NEIGHBORHOOD) {
             const neighborhood = MapGenerator.randomNeighborhood();
             return {
                 type: cellType,
                 properties: {
-                    neighborhoodType: neighborhood.type,
-                    neighborhoodVariant: neighborhood.variant,
+                    neighborhoodType: properties.neighborhoodType ?? neighborhood.type,
+                    neighborhoodVariant: properties.neighborhoodVariant ?? neighborhood.variant,
                     possibleDirections: [],
                     imageSrc: 'assets/objects/house.png',
                 },
