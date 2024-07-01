@@ -47,6 +47,18 @@ class MapGenerator {
         },
     };
 
+    static shops = [
+        {nx: 0, ny: 2},
+        {nx: 1, ny: 0},
+        {nx: 3, ny: 2},
+    ];
+
+    static gasStations = [
+        {nx: 0, ny: 0},
+        {nx: 2, ny: 3},
+        {nx: 3, ny: 1},
+    ];
+
     constructor(mapConfig, patternMatcher, objectTypes) {
         this.mapConfig = mapConfig;
         this.patternMatcher = patternMatcher;
@@ -58,9 +70,6 @@ class MapGenerator {
         const totalNeighborhoodSize = mapSize * (this.mapConfig.neighborhoodSize + this.mapConfig.sidewalkSize * 2 + this.mapConfig.roadSize) + this.mapConfig.roadSize + this.mapConfig.borderSize * 2;
 
         const map = new GameMap(totalNeighborhoodSize);
-
-        const allowedStoresAmount = 3;
-        let storesUsed = 0;
 
         for (let i = 0; i < mapSize; i++) {
             for (let j = 0; j < mapSize; j++) {
@@ -79,14 +88,6 @@ class MapGenerator {
                             map.setTile(neighborhoodStartX + l, neighborhoodStartY + k, MapGenerator.cell(TILE_TYPES.NEIGHBORHOOD));
                         }
                     }
-                }
-                if (Math.random() > 0.74 && storesUsed < allowedStoresAmount) {
-                    map.setTile(
-                        neighborhoodStartX + this.mapConfig.neighborhoodSize - 2,
-                        neighborhoodStartY + this.mapConfig.neighborhoodSize - 2,
-                        MapGenerator.cell(TILE_TYPES.NEIGHBORHOOD, { neighborhoodType: 'shop', neighborhoodVariant: 0 }),
-                    );
-                    storesUsed++;
                 }
 
                 for (let y = -1; y <= this.mapConfig.neighborhoodSize; y++) {
@@ -111,6 +112,34 @@ class MapGenerator {
                     }
                 }
             }
+        }
+
+        for (let i = 0; i < MapGenerator.shops.length; i++) {
+            const nx = MapGenerator.shops[i].nx < mapSize ? MapGenerator.shops[i].nx : mapSize - 1;
+            const ny = MapGenerator.shops[i].ny < mapSize ? MapGenerator.shops[i].ny : mapSize - 1;
+            const neighborhoodStartX = this.mapConfig.borderSize + nx * (this.mapConfig.neighborhoodSize + this.mapConfig.sidewalkSize * 2 + this.mapConfig.roadSize) + this.mapConfig.roadSize + this.mapConfig.sidewalkSize;
+            const neighborhoodStartY = this.mapConfig.borderSize + ny * (this.mapConfig.neighborhoodSize + this.mapConfig.sidewalkSize * 2 + this.mapConfig.roadSize) + this.mapConfig.roadSize + this.mapConfig.sidewalkSize;
+            const x = neighborhoodStartX + this.mapConfig.neighborhoodSize - 1;
+            const y = neighborhoodStartY + this.mapConfig.neighborhoodSize - 1;
+            map.setTile(
+                neighborhoodStartX + this.mapConfig.neighborhoodSize - 2,
+                neighborhoodStartY + this.mapConfig.neighborhoodSize - 2,
+                MapGenerator.cell(TILE_TYPES.NEIGHBORHOOD, {neighborhoodType: 'shop', neighborhoodVariant: 0}),
+            );
+        }
+
+        for (let i = 0; i < MapGenerator.gasStations.length; i++) {
+            const nx = MapGenerator.gasStations[i].nx < mapSize ? MapGenerator.gasStations[i].nx : mapSize - 1;
+            const ny = MapGenerator.gasStations[i].ny < mapSize ? MapGenerator.gasStations[i].ny : mapSize - 1;
+            const neighborhoodStartX = this.mapConfig.borderSize + nx * (this.mapConfig.neighborhoodSize + this.mapConfig.sidewalkSize * 2 + this.mapConfig.roadSize) + this.mapConfig.roadSize + this.mapConfig.sidewalkSize;
+            const neighborhoodStartY = this.mapConfig.borderSize + ny * (this.mapConfig.neighborhoodSize + this.mapConfig.sidewalkSize * 2 + this.mapConfig.roadSize) + this.mapConfig.roadSize + this.mapConfig.sidewalkSize;
+            const x = neighborhoodStartX + this.mapConfig.neighborhoodSize - 1;
+            const y = neighborhoodStartY + this.mapConfig.neighborhoodSize - 1;
+            map.setTile(
+                neighborhoodStartX,
+                neighborhoodStartY + this.mapConfig.neighborhoodSize - 2,
+                MapGenerator.cell(TILE_TYPES.NEIGHBORHOOD, {neighborhoodType: 'gas', neighborhoodVariant: 0}),
+            );
         }
 
         console.log(map.map);

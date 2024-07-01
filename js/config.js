@@ -19,6 +19,7 @@ const Config = {
         'parking-2.png',
         'park-0.png',
         'shop-0.png',
+        'gas-0.png',
     ],
     drawing: {
         tileSize: { width: 62, height: 32 },
