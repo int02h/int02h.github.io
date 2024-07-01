@@ -18,7 +18,7 @@ const createEffects = function(ctx) {
 
         this.id = "dispatcher"
         this.getTitle = function(ctx) { return `Hire dispatcher ${formatPrice(price)}`}
-        this.isVisible = function(ctx) { return !ctx.has_dispatcher && ctx.total_driver_count >= 2 },
+        this.isVisible = function(ctx) { return !ctx.has_dispatcher && ctx.total_driver_count >= 2 }
         this.canApply = function(ctx) { return ctx.total_money >= price && this.isVisible(ctx) }
         this.apply = function(ctx) {
             ctx.applied_effects.push(this.id)
@@ -57,12 +57,27 @@ const createEffects = function(ctx) {
         }
     }
 
+    const taxiLicense500 = new function() {
+        const price = 8000
+        const allowedAmount = 500
+
+        this.id = `taxi_license_${allowedAmount}`
+        this.getTitle = function(ctx) { return `Buy license for ${allowedAmount} drivers ${formatPrice(price)}`}
+        this.isVisible = function(ctx) { return !ctx.applied_effects.includes(this.id) && ctx.applied_effects.includes(taxiLicense50.id) }
+        this.canApply = function(ctx) { return ctx.total_money >= price && this.isVisible(ctx) }
+        this.apply = function(ctx) {
+            ctx.applied_effects.push(this.id)
+            ctx.allowed_driver_count = allowedAmount
+            ctx.total_money -= price
+        }
+    }
+
     const stickers = new function() {
         const price = 50.00
 
         this.id = "stickers"
         this.getTitle = function(ctx) { return `Stickers on bus stops ${formatPrice(price)}` },
-        this.isVisible = function(ctx) { return !ctx.applied_effects.includes(this.id) && ctx.total_driver_count >= 3 },
+        this.isVisible = function(ctx) { return !ctx.applied_effects.includes(this.id) && ctx.total_driver_count >= 3 }
         this.canApply = function(ctx) { return ctx.total_money >= price && this.isVisible(ctx) }
         this.apply = function(ctx) {
             ctx.applied_effects.push(this.id)
@@ -94,13 +109,13 @@ const createEffects = function(ctx) {
         this.canApply = function(ctx) { return ctx.total_money >= price && this.isVisible(ctx) }
         this.apply = function(ctx) {
             ctx.applied_effects.push(this.id)
-            ctx.rider_per_second *= 4
+            ctx.rider_per_second = 5
             ctx.total_money -= price
         }
     };
 
     const mobileApp = new function() {
-        const price = 5000.00
+        const price = 50_000.00
 
         this.id = "mobile_app"
         this.getTitle = function(ctx) { return `Develop mobile app ${formatPrice(price)}` }
@@ -108,7 +123,7 @@ const createEffects = function(ctx) {
         this.canApply = function(ctx) { return ctx.total_money >= price && this.isVisible(ctx) }
         this.apply = function(ctx) {
             ctx.applied_effects.push(this.id)
-            ctx.rider_per_second *= 2
+            ctx.rider_per_second = 60
             ctx.total_money -= price
         }
     };
@@ -118,6 +133,7 @@ const createEffects = function(ctx) {
         dispatcher,
         taxiLicense10,
         taxiLicense50,
+        taxiLicense500,
         stickers,
         leaflets,
         billboards,
