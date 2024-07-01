@@ -27,7 +27,7 @@ const defaultCtx = {
 
     // effects and events
     applied_effects: [],
-    occured_events: [],
+    occurred_events: [],
 
     // time
     tick: 0
@@ -69,6 +69,10 @@ function init() {
 
     if (localStorage.game_ctx) {
         ctx = JSON.parse(localStorage.game_ctx)
+        // temporary migration
+        if (ctx.occured_events) {
+            ctx.occurred_events = ctx.occured_events
+        }
     } else {
         ctx = defaultCtx
     }
