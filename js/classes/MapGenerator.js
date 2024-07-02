@@ -43,7 +43,7 @@ class MapGenerator {
         },
         park: {
             probability: 0.1,
-            variants: 1,
+            variants: 2,
         },
     };
 
@@ -57,6 +57,10 @@ class MapGenerator {
         {nx: 0, ny: 0},
         {nx: 2, ny: 3},
         {nx: 3, ny: 1},
+    ];
+
+    static offices = [
+        {nx: 1, ny: 1},
     ];
 
     constructor(mapConfig, patternMatcher, objectTypes) {
@@ -114,33 +118,23 @@ class MapGenerator {
             }
         }
 
-        for (let i = 0; i < MapGenerator.shops.length; i++) {
-            const nx = MapGenerator.shops[i].nx < mapSize ? MapGenerator.shops[i].nx : mapSize - 1;
-            const ny = MapGenerator.shops[i].ny < mapSize ? MapGenerator.shops[i].ny : mapSize - 1;
-            const neighborhoodStartX = this.mapConfig.borderSize + nx * (this.mapConfig.neighborhoodSize + this.mapConfig.sidewalkSize * 2 + this.mapConfig.roadSize) + this.mapConfig.roadSize + this.mapConfig.sidewalkSize;
-            const neighborhoodStartY = this.mapConfig.borderSize + ny * (this.mapConfig.neighborhoodSize + this.mapConfig.sidewalkSize * 2 + this.mapConfig.roadSize) + this.mapConfig.roadSize + this.mapConfig.sidewalkSize;
-            const x = neighborhoodStartX + this.mapConfig.neighborhoodSize - 1;
-            const y = neighborhoodStartY + this.mapConfig.neighborhoodSize - 1;
-            map.setTile(
-                neighborhoodStartX + this.mapConfig.neighborhoodSize - 2,
-                neighborhoodStartY + this.mapConfig.neighborhoodSize - 2,
-                MapGenerator.cell(TILE_TYPES.NEIGHBORHOOD, {neighborhoodType: 'shop', neighborhoodVariant: 0}),
-            );
-        }
+        const placeSpecialObjects = (objects, type, variant=0, offsetX=0, offsetY=0) => {
+            for (let i = 0; i < objects.length; i++) {
+                const nx = objects[i].nx < mapSize ? objects[i].nx : mapSize - 1;
+                const ny = objects[i].ny < mapSize ? objects[i].ny : mapSize - 1;
+                const neighborhoodStartX = this.mapConfig.borderSize + nx * (this.mapConfig.neighborhoodSize + this.mapConfig.sidewalkSize * 2 + this.mapConfig.roadSize) + this.mapConfig.roadSize + this.mapConfig.sidewalkSize;
+                const neighborhoodStartY = this.mapConfig.borderSize + ny * (this.mapConfig.neighborhoodSize + this.mapConfig.sidewalkSize * 2 + this.mapConfig.roadSize) + this.mapConfig.roadSize + this.mapConfig.sidewalkSize;
+                map.setTile(
+                    neighborhoodStartX + this.mapConfig.neighborhoodSize - 2 * (offsetX + 1),
+                    neighborhoodStartY + this.mapConfig.neighborhoodSize - 2 * (offsetY + 1),
+                    MapGenerator.cell(TILE_TYPES.NEIGHBORHOOD, {neighborhoodType: type, neighborhoodVariant: variant}),
+                );
+            }
+        };
 
-        for (let i = 0; i < MapGenerator.gasStations.length; i++) {
-            const nx = MapGenerator.gasStations[i].nx < mapSize ? MapGenerator.gasStations[i].nx : mapSize - 1;
-            const ny = MapGenerator.gasStations[i].ny < mapSize ? MapGenerator.gasStations[i].ny : mapSize - 1;
-            const neighborhoodStartX = this.mapConfig.borderSize + nx * (this.mapConfig.neighborhoodSize + this.mapConfig.sidewalkSize * 2 + this.mapConfig.roadSize) + this.mapConfig.roadSize + this.mapConfig.sidewalkSize;
-            const neighborhoodStartY = this.mapConfig.borderSize + ny * (this.mapConfig.neighborhoodSize + this.mapConfig.sidewalkSize * 2 + this.mapConfig.roadSize) + this.mapConfig.roadSize + this.mapConfig.sidewalkSize;
-            const x = neighborhoodStartX + this.mapConfig.neighborhoodSize - 1;
-            const y = neighborhoodStartY + this.mapConfig.neighborhoodSize - 1;
-            map.setTile(
-                neighborhoodStartX,
-                neighborhoodStartY + this.mapConfig.neighborhoodSize - 2,
-                MapGenerator.cell(TILE_TYPES.NEIGHBORHOOD, {neighborhoodType: 'gas', neighborhoodVariant: 0}),
-            );
-        }
+        placeSpecialObjects(MapGenerator.shops, 'shop');
+        placeSpecialObjects(MapGenerator.gasStations, 'gas', 0, 2, 0);
+        placeSpecialObjects(MapGenerator.offices, 'office');
 
         console.log(map.map);
         return map;
