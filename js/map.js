@@ -14,7 +14,7 @@ let directionPatternMatcher;
 let mapGenerator;
 let objectRenderer;
 let map;
-let trips = [];
+export let trips = [];
 let mapRenderer;
 let isoCanvas;
 let imageStorage;
@@ -124,7 +124,7 @@ function onMapCalculationTick() {
     trips = trips.filter(trip => !trip?.isFinished());
 }
 
-function createRandomTrip() {
+export function createRandomTrip(carType = 'private') {
     const retries = 5;
     for (let i = 0; i < retries; i++) {
         try {
@@ -133,6 +133,7 @@ function createRandomTrip() {
             const trip = new Trip(start, finish, map.map, {
                 fromIdleSteps: 1,
                 toIdleSteps: 1,
+                carType: carType,
             });
             if (trip.path.path.length > 0) {
                 return trip;
@@ -164,6 +165,8 @@ function addEventListeners(canvas, map, isoCanvas) {
         // console.log('Map Coordinates:', mapCoords);
         // console.log('Nearest road:', start);
     });
+
+
 }
 
 function serializeGameMap(gameMap) {

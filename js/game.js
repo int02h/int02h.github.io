@@ -1,3 +1,7 @@
+import {trips, createRandomTrip} from './map.js';
+import {formatAmount, formatPrice} from './helpers.js';
+import {createEffects} from './effects.js';
+import {Popup} from "./classes/Popup.js";
 
 const tickPerSecond = 10
 
@@ -52,6 +56,8 @@ let startRideButton
 let gameTickIntervalId
 let nextEventToOccur
 
+let popup
+
 function init() {
     riderCountView = document.getElementById("rider_count")
     totalRideCountView = document.getElementById("total_ride_count")
@@ -66,6 +72,13 @@ function init() {
 
     inviteRiderButton.onclick = inviteRider
     startRideButton.onclick = startRide
+
+    popup = new Popup({
+        popupOverlay: document.getElementById('popup-overlay'),
+        popupContent: document.getElementById('popup-content'),
+        onOpenModal: pauseGame,
+        onCloseModal: resumeGame,
+    });
 
     if (localStorage.game_ctx) {
         ctx = JSON.parse(localStorage.game_ctx)
@@ -107,7 +120,7 @@ function onGameTick() {
 
     nextEventToOccur = gameEvents.find(e => e.isReadyToOccur(ctx))
     if (nextEventToOccur) {
-        showPopup(nextEventToOccur.getContent(ctx))
+        popup.showPopup(nextEventToOccur.getContent(ctx))
     }
 
     ctx.tick++
@@ -160,29 +173,13 @@ function startRide() {
         ctx.available_driver_count -= rideCount
         const rideDurationTicks = ctx.ride_duration_s * tickPerSecond
         ctx.driver_available_at.push({ tick: ctx.tick + rideDurationTicks, amount: rideCount})
+
+        trips.push(createRandomTrip('taxi'));
     }
 }
 
 function canStartRide() {
     return ctx.available_driver_count > 0 && ctx.rider_count > 0
-}
-
-function formatAmount(amount) {
-    if (amount >= 1000) {
-        return `${(amount / 1000).toFixed(1)}K`
-    }
-
-    return amount.toFixed(0);
-}
-
-function formatPrice(price) {
-    if (price >= 1000000) {
-        return `€${(price / 1000000).toFixed(1)}M`
-    }
-    if (price >= 1000) {
-        return `€${price.toFixed(0)}`
-    }
-    return `€${price.toFixed(2)}`
 }
 
 function saveGame() {

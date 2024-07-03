@@ -1,4 +1,5 @@
 const createGameEvents = function() {
+	console.log("createGameEvents");
 
 	const municipalSupport = new function() {
 		const amount = 1000

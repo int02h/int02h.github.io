@@ -1,4 +1,6 @@
-const createEffects = function(ctx) {
+import {formatPrice} from './helpers.js';
+
+export const createEffects = function(ctx) {
 
     const driver = new function() {
         this.id = "driver"
@@ -88,7 +90,7 @@ const createEffects = function(ctx) {
 
     const leaflets = new function() {
         const price = 100.00
-        
+
         this.id = "leaflets"
         this.getTitle = function(ctx) { return `Distribute leaflets ${formatPrice(price)}` }
         this.isVisible = function(ctx) { return !ctx.applied_effects.includes(this.id) && ctx.applied_effects.includes(stickers.id) }
