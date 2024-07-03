@@ -18,14 +18,41 @@ class GameMap {
         }
     }
 
+    getRandomInvisibleRoadTile() {
+        const invisibleRoads = this.getInvisibleRoads();
+        return invisibleRoads[Math.floor(Math.random() * invisibleRoads.length)];
+    }
+
     getRandomRoadTile() {
         const roadTiles = Array.from(this.roadTiles);
         return roadTiles[Math.floor(Math.random() * roadTiles.length)];
     }
 
+    // this method returns all road tiles that are not visible
+    // because they are behind high neighborhood objects
+    // and the player cannot see them
+    getInvisibleRoads() {
+        if (this.invisibleRoads?.length === undefined) {
+            const shifts = [{x: 3, y: 3}, {x: 2, y: 3}, {x: 3, y: 2}, {x: 2, y: 2}];
+            this.invisibleRoads = [];
+            const roadTiles = Array.from(this.roadTiles);
+            for (const {x, y} of roadTiles) {
+                for (const shift of shifts) {
+                    const cell = this.map[y+shift.y][x+shift.x];
+                    if (cell.properties.neighborhoodType === 'house' && [1, 3, 5].includes(cell.properties.neighborhoodVariant)) {
+                        this.invisibleRoads.push({x, y});
+                    }
+                }
+            }
+            console.log('invisibleRoads', this.invisibleRoads);
+        }
+
+        return this.invisibleRoads;
+    }
+
     static emptyMapTiles(size) {
         return Array.from(
-            { length: size },
+            {length: size},
             () => Array(size).fill(MapGenerator.cell(TILE_TYPES.GRASS))
         );
     }

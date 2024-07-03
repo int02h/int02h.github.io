@@ -28,6 +28,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function initializeGame() {
+    localStorage.game_map = "";
+
     imagePatternMatcher = new PatternMatcher(TILE_IMAGE_PATTERN_RULES);
     directionPatternMatcher = new PatternMatcher(ROAD_DIRECTION_PATTERN_RULES);
     mapGenerator = new MapGenerator(Config.map, directionPatternMatcher, Config.objectTypes);
@@ -126,8 +128,8 @@ function createRandomTrip() {
     const retries = 5;
     for (let i = 0; i < retries; i++) {
         try {
-            const start = map.getRandomRoadTile();
-            const finish = map.getRandomRoadTile();
+            const start = map.getRandomInvisibleRoadTile();
+            const finish = map.getRandomInvisibleRoadTile();
             const trip = new Trip(start, finish, map.map, {
                 fromIdleSteps: 1,
                 toIdleSteps: 1,
@@ -148,8 +150,8 @@ function addEventListeners(canvas, map, isoCanvas) {
         // const mapCoords = isoCanvas.canvasToMapCoords(x, y);
 
         for (let i = 0; i < 10; i++) {
-            const start = map.getRandomRoadTile();
-            const finish = map.getRandomRoadTile();
+            const start = map.getRandomInvisibleRoadTile();
+            const finish = map.getRandomInvisibleRoadTile();
             const trip = new Trip(start, finish, map.map, {
                 fromIdleSteps: 1,
                 toIdleSteps: 1,
