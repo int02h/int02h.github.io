@@ -143,6 +143,25 @@ export function createRandomTrip(carType = 'private') {
     }
 }
 
+export function createRandomTaxiTrip() {
+    const retries = 5;
+    for (let i = 0; i < retries; i++) {
+        try {
+            const start = map.getRandomVisibleRoadTile();
+            const finish = map.getRandomVisibleRoadTile();
+            const trip = new Trip(start, finish, map.map, {
+                fromIdleSteps: 3,
+                toIdleSteps: 3,
+                carType: 'taxi',
+            });
+            if (trip.path.path.length > 0) {
+                return trip;
+            }
+        } catch (error) {
+        }
+    }
+}
+
 function addEventListeners(canvas, map, isoCanvas) {
     canvas.addEventListener('click', (event) => {
         // const rect = canvas.getBoundingClientRect();

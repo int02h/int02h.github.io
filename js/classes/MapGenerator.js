@@ -23,6 +23,11 @@ class GameMap {
         return invisibleRoads[Math.floor(Math.random() * invisibleRoads.length)];
     }
 
+    getRandomVisibleRoadTile() {
+        const visibleRoads = this.getVisibleRoads();
+        return visibleRoads[Math.floor(Math.random() * visibleRoads.length)];
+    }
+
     getRandomRoadTile() {
         const roadTiles = Array.from(this.roadTiles);
         return roadTiles[Math.floor(Math.random() * roadTiles.length)];
@@ -48,6 +53,14 @@ class GameMap {
         }
 
         return this.invisibleRoads;
+    }
+
+    getVisibleRoads() {
+        if (this.visibleRoads?.length === undefined) {
+            this.visibleRoads = Array.from(this.roadTiles).filter(({x, y}) => !this.getInvisibleRoads().some(tile => tile.x === x && tile.y === y));
+        }
+
+        return this.visibleRoads;
     }
 
     static emptyMapTiles(size) {
@@ -88,6 +101,13 @@ class MapGenerator {
 
     static offices = [
         {nx: 1, ny: 1},
+    ];
+
+    static highBuildings = [
+        {nx: 0, ny: 0},
+        {nx: 0, ny: 3},
+        {nx: 3, ny: 0},
+        {nx: 3, ny: 3},
     ];
 
     constructor(mapConfig, patternMatcher, objectTypes) {
@@ -145,12 +165,14 @@ class MapGenerator {
             }
         }
 
-        const placeSpecialObjects = (objects, type, variant=0, offsetX=0, offsetY=0) => {
+        const placeSpecialObjects = (objects, type, variants=[0], offsetX=0, offsetY=0) => {
             for (let i = 0; i < objects.length; i++) {
                 const nx = objects[i].nx < mapSize ? objects[i].nx : mapSize - 1;
                 const ny = objects[i].ny < mapSize ? objects[i].ny : mapSize - 1;
                 const neighborhoodStartX = this.mapConfig.borderSize + nx * (this.mapConfig.neighborhoodSize + this.mapConfig.sidewalkSize * 2 + this.mapConfig.roadSize) + this.mapConfig.roadSize + this.mapConfig.sidewalkSize;
                 const neighborhoodStartY = this.mapConfig.borderSize + ny * (this.mapConfig.neighborhoodSize + this.mapConfig.sidewalkSize * 2 + this.mapConfig.roadSize) + this.mapConfig.roadSize + this.mapConfig.sidewalkSize;
+
+                const variant = variants[Math.floor(Math.random() * variants.length)];
                 map.setTile(
                     neighborhoodStartX + this.mapConfig.neighborhoodSize - 2 * (offsetX + 1),
                     neighborhoodStartY + this.mapConfig.neighborhoodSize - 2 * (offsetY + 1),
@@ -160,8 +182,15 @@ class MapGenerator {
         };
 
         placeSpecialObjects(MapGenerator.shops, 'shop');
-        placeSpecialObjects(MapGenerator.gasStations, 'gas', 0, 2, 0);
-        placeSpecialObjects(MapGenerator.offices, 'office');
+        placeSpecialObjects(MapGenerator.gasStations, 'gas', [0], 2, 0);
+        placeSpecialObjects(MapGenerator.highBuildings, 'house', [1, 3, 5], 0, 2);
+        placeSpecialObjects([{nx: 1, ny: 1}], 'office');
+        placeSpecialObjects([{nx: 1, ny: 1}], 'house', [1], 0, 1);
+
+        // an experiment
+        placeSpecialObjects([{nx: 1, ny: -1}, {nx: 0, ny: -1}, {nx: 2, ny: -1}], 'park', [1], 0, -0.5);
+        placeSpecialObjects([{nx: 1, ny: -1}, {nx: 0, ny: -1}, {nx: 3, ny: -1}], 'park', [0], 1.5, 0);
+        placeSpecialObjects([{nx: 1, ny: -1}, {nx: 0, ny: -1}, {nx: 3, ny: -1}], 'park', [0], 2.5, 0);
 
         console.log(map.map);
         return map;

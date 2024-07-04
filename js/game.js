@@ -1,4 +1,4 @@
-import {trips, createRandomTrip} from './map.js';
+import {trips, createRandomTaxiTrip} from './map.js';
 import {formatAmount, formatPrice} from './helpers.js';
 import {createEffects} from './effects.js';
 import {Popup} from "./classes/Popup.js";
@@ -175,7 +175,7 @@ function startRide() {
         ctx.driver_available_at.push({ tick: ctx.tick + rideDurationTicks, amount: rideCount})
 
         for (let i = 0; i < rideCount; i++) {
-            trips.push(createRandomTrip('taxi'));
+            trips.push(createRandomTaxiTrip('taxi'));
         }
     }
 }
