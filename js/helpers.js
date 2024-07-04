@@ -1,4 +1,5 @@
 export function formatAmount(amount) {
+    amount ||= 0;
     if (amount >= 1000) {
         return `${(amount / 1000).toFixed(1)}K`
     }
@@ -7,6 +8,7 @@ export function formatAmount(amount) {
 }
 
 export function formatPrice(price) {
+    price ||= 0;
     if (price >= 1000000) {
         return `€${(price / 1000000).toFixed(1)}M`
     }
