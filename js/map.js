@@ -103,7 +103,7 @@ function onMapAnimationTick() {
         try {
             const car = trip.car;
             const carImage = imageStorage[car.getImage()];
-            isoCanvas?.draw(car.position.x, car.position.y, carImage);
+            isoCanvas?.draw(car.position.x, car.position.y, carImage, car.shift);
         } catch (error) {
             console.log(trips);
             console.warn('Error rendering trip:', error);

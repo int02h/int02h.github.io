@@ -1,9 +1,12 @@
 import {Path} from "./Path.js";
 
 class Car {
-    constructor(initialPosition, images) {
+    constructor(initialPosition, graphics) {
+        const {shift, ...images} = graphics;
+
         this.position = initialPosition;
         this.images = images;
+        this.shift = shift;
         this.path = new Path();
         this.currentStep = 0;
     }

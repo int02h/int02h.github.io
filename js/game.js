@@ -174,7 +174,9 @@ function startRide() {
         const rideDurationTicks = ctx.ride_duration_s * tickPerSecond
         ctx.driver_available_at.push({ tick: ctx.tick + rideDurationTicks, amount: rideCount})
 
-        trips.push(createRandomTrip('taxi'));
+        for (let i = 0; i < rideCount; i++) {
+            trips.push(createRandomTrip('taxi'));
+        }
     }
 }
 

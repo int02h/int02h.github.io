@@ -15,7 +15,10 @@ class Trip {
 
         const pathfinding = new Pathfinding(map);
         this.path = pathfinding.findShortestPath(this.from, this.to, options);
-        this.car = new Car(from, this.carStrategy[carType].getImages());
+        this.car = new Car(from, {
+            ...this.carStrategy[carType].getImages(),
+            shift: this.carStrategy[carType].getShift(),
+        });
         this.car.setPath(this.path);
     }
 
@@ -31,6 +34,10 @@ class Trip {
 }
 
 class TaxiTripCar {
+    getShift() {
+        return 50;
+    }
+
     getImages() {
         return {
             up: 'assets/objects/taxi-car-up.png',
@@ -64,6 +71,10 @@ class PrivateTripCar {
     ]
     getImages() {
         return this.imageCollection[Math.floor(Math.random() * this.imageCollection.length)];
+    }
+
+    getShift() {
+        return 0;
     }
 }
 
