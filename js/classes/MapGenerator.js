@@ -185,7 +185,11 @@ class MapGenerator {
         placeSpecialObjects(MapGenerator.gasStations, 'gas', [0], 2, 0);
         placeSpecialObjects(MapGenerator.highBuildings, 'house', [1, 3, 5], 0, 2);
         placeSpecialObjects([{nx: 1, ny: 1}], 'office');
-        placeSpecialObjects([{nx: 1, ny: 1}], 'house', [1], 0, 1);
+        placeSpecialObjects([{nx: 1, ny: 1}], 'house', [5], 0, 1);
+        placeSpecialObjects([{nx: 1, ny: 1}], 'house', [1], 1, 0);
+
+        placeSpecialObjects([{nx: 1, ny: 2}], 'factory', [0], 0, 0);
+        placeSpecialObjects([{nx: 1, ny: 2}], 'factory', [1], 0, 1);
 
         // an experiment
         placeSpecialObjects([{nx: 1, ny: -1}, {nx: 0, ny: -1}, {nx: 2, ny: -1}], 'park', [1], 0, -0.5);

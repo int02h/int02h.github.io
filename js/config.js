@@ -22,6 +22,8 @@ const Config = {
         'shop-0.png',
         'gas-0.png',
         'office-0.png',
+        'factory-0.png',
+        'factory-1.png',
     ],
     drawing: {
         tileSize: { width: 62, height: 32 },
