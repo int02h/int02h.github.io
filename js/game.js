@@ -209,8 +209,7 @@ function buildOffice() {
 }
 
 function test() {
-    console.log("test");
-    //buildOffice();
+    // buildOffice();
     pauseGame();
 }
 
