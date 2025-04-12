@@ -51,7 +51,7 @@ class MapRenderer {
                     this.patternMatcher.matchPattern(map, x, y) ?? `assets/tiles/${map[y][x].type}.png`;
                 const img = imageStorage[imgSrc];
 
-                this.isoCanvas.draw(x, y, img);
+                this.isoCanvas.draw(x, y, img, 0, map[y][x].type);
             }
         }
     }
@@ -65,7 +65,7 @@ class MapRenderer {
             const isoY = (x + y) * (halfTileHeight / 2 + 8) + 25;
             this.cacheCtx.drawImage(image, isoX, isoY, this.isoCanvas.tileSize.width, this.isoCanvas.tileSize.height);
         } else {
-            console.error(`Missing image for source: ${image}`);
+            console.error(`Missing  image for source: ${image}`);
         }
     }
 

@@ -19,6 +19,7 @@ const Config = {
         'parking-2.png',
         'park-0.png',
         'park-1.png',
+        'park-2.png',
         'shop-0.png',
         'gas-0.png',
         'office-0.png',
