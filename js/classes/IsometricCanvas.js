@@ -11,7 +11,7 @@ class IsometricCanvas {
         this.tileSize = geometry.tileSize;
     }
 
-    draw(x, y, image, shift=0) {
+    draw(x, y, image, shift, type) {
         const halfTileWidth = this.tileSize.width / 2;
         const halfTileHeight = this.tileSize.height / 2;
 
@@ -20,7 +20,8 @@ class IsometricCanvas {
             const isoY = (x + y) * (halfTileHeight / 2 + 8) + 25;
             this.ctx.drawImage(image, isoX, isoY - shift, this.tileSize.width, this.tileSize.height + shift);
         } else {
-            console.error(`Missing image for source: ${image}`);
+            console.error(`Missing canvas image for source: ${image}, ${x}, ${y}`);
+            console.log(type);
         }
     }
 
@@ -33,7 +34,7 @@ class IsometricCanvas {
             const isoY = (x + y) * (halfTileHeight / 2 + 8) + 25;
             this.ctx.drawImage(image, Math.floor(isoX - image.width / 4), isoY - 137, image.width, image.height);
         } else {
-            console.error(`Missing image for source: ${image}`);
+            console.error(`Missing object image for source: ${image}`);
         }
     }
 

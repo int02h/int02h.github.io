@@ -5,7 +5,12 @@ import {GameMap, MapGenerator} from "./classes/MapGenerator.js";
 import MapRenderer from './classes/MapRenderer.js';
 import ObjectRenderer from './classes/ObjectRenderer.js';
 import Trip from './classes/Trip.js';
-import {ROAD_DIRECTION_PATTERN_RULES, TILE_IMAGE_PATTERN_RULES, PatternMatcher} from './classes/PatternMatcher.js';
+import {
+    ROAD_DIRECTION_PATTERN_RULES,
+    TILE_IMAGE_PATTERN_RULES,
+    PatternMatcher,
+    TILE_TYPES
+} from './classes/PatternMatcher.js';
 import {Config} from "./config.js";
 
 let imageLoader = new ImageLoader(Config.objectTypes);
@@ -28,7 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function initializeGame() {
-    localStorage.game_map = "";
+    // localStorage.game_map = "";
 
     imagePatternMatcher = new PatternMatcher(TILE_IMAGE_PATTERN_RULES);
     directionPatternMatcher = new PatternMatcher(ROAD_DIRECTION_PATTERN_RULES);
@@ -37,6 +42,7 @@ async function initializeGame() {
 
     const savedGameMap = localStorage.game_map;
     if (!!savedGameMap) {
+        console.log('Loading map from local storage');
         try {
             map = deserializeGameMap(savedGameMap)
             console.log(map);
@@ -47,6 +53,7 @@ async function initializeGame() {
             localStorage.game_map = serializeGameMap(map);
         }
     } else {
+        console.log('No saved map found. Generating new map');
         map = mapGenerator.generateBaseMap(Config.map.neighborhoodCount);
         mapGenerator.fillMapMetadata(map.map);
         localStorage.game_map = serializeGameMap(map);
@@ -103,7 +110,7 @@ function onMapAnimationTick() {
         try {
             const car = trip.car;
             const carImage = imageStorage[car.getImage()];
-            isoCanvas?.draw(car.position.x, car.position.y, carImage, car.shift);
+            isoCanvas?.draw(car.position.x, car.position.y, carImage, car.shift, {car, });
         } catch (error) {
             console.log(trips);
             console.warn('Error rendering trip:', error);
@@ -186,6 +193,13 @@ function addEventListeners(canvas, map, isoCanvas) {
     });
 
 
+}
+
+export function placeOfficeObject(x, y) {
+    map.setTile(x, y,
+        MapGenerator.cell(TILE_TYPES.NEIGHBORHOOD, {neighborhoodType: 'office', neighborhoodVariant: 0}),
+    );
+    localStorage.game_map = serializeGameMap(map);
 }
 
 function serializeGameMap(gameMap) {

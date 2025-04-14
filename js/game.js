@@ -1,4 +1,4 @@
-import {trips, createRandomTaxiTrip} from './map.js';
+import {trips, createRandomTaxiTrip, placeOfficeObject} from './map.js';
 import {formatAmount, formatPrice} from './helpers.js';
 import {createEffects} from './effects.js';
 import {Popup} from "./classes/Popup.js";
@@ -189,23 +189,33 @@ function saveGame() {
 }
 
 function resetGame() {
-    ctx = defaultCtx
-    saveGame()
+    ctx = defaultCtx;
+    saveGame();
     localStorage.game_map = "";
+    location.reload();
 }
 
-function pauseGame() {
-    clearInterval(gameTickIntervalId)
-}
-
-function resumeGame() {
-    onGameTick()
-    gameTickIntervalId = setInterval(onGameTick, 1000 / tickPerSecond)
+function buildOffice() {
+    placeOfficeObject(20, 20);
 }
 
 function test() {
+    console.log("test");
+    buildOffice();
+}
+
+function pauseGame() {
+    clearInterval(gameTickIntervalId);
+}
+
+function resumeGame() {
+    onGameTick();
+    gameTickIntervalId = setInterval(onGameTick, 1000 / tickPerSecond);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
     init();
+
+    document.getElementById('tickButton').addEventListener('click', test);
+    document.getElementById('resetGameButton').addEventListener('click', resetGame);
 });

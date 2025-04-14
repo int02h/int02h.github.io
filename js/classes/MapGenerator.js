@@ -16,6 +16,10 @@ class GameMap {
         if (tile.type === TILE_TYPES.ROAD) {
             this.roadTiles.add({x, y});
         }
+
+        if (tile.type === TILE_TYPES.NEIGHBORHOOD) {
+            tile.properties.imageSrc = `assets/objects/${tile.properties.neighborhoodType}-${tile.properties.neighborhoodVariant}.png`;
+        }
     }
 
     getRandomInvisibleRoadTile() {
@@ -184,13 +188,32 @@ class MapGenerator {
         placeSpecialObjects(MapGenerator.shops, 'shop');
         placeSpecialObjects(MapGenerator.gasStations, 'gas', [0], 2, 0);
         placeSpecialObjects(MapGenerator.highBuildings, 'house', [1, 3, 5], 0, 2);
-        placeSpecialObjects([{nx: 1, ny: 1}], 'office');
-        placeSpecialObjects([{nx: 1, ny: 1}], 'house', [1], 0, 1);
+        placeSpecialObjects([{nx: 1, ny: 1}], 'house', [5], 0, 1);
+        placeSpecialObjects([{nx: 1, ny: 1}], 'house', [1], 1, 0);
+
+        placeSpecialObjects([{nx: 1, ny: 2}], 'factory', [0], 0, 0);
+        placeSpecialObjects([{nx: 1, ny: 2}], 'factory', [1], 0, 1);
 
         // an experiment
-        placeSpecialObjects([{nx: 1, ny: -1}, {nx: 0, ny: -1}, {nx: 2, ny: -1}], 'park', [1], 0, -0.5);
-        placeSpecialObjects([{nx: 1, ny: -1}, {nx: 0, ny: -1}, {nx: 3, ny: -1}], 'park', [0], 1.5, 0);
-        placeSpecialObjects([{nx: 1, ny: -1}, {nx: 0, ny: -1}, {nx: 3, ny: -1}], 'park', [0], 2.5, 0);
+        // map top-right line
+        placeSpecialObjects([{nx: 1, ny: -1}, {nx: 0, ny: -1}, {nx: 2, ny: -1}, {nx: 3, ny: -1}], 'park', [1], 1, -0.5);
+        placeSpecialObjects([{nx: 1, ny: -1}, {nx: 0, ny: -1}, {nx: 2, ny: -1}, {nx: 3, ny: -1}], 'park', [0], 2, 0);
+        placeSpecialObjects([{nx: 1, ny: -1}, {nx: 0, ny: -1}, {nx: 2, ny: -1}, {nx: 3, ny: -1}], 'park', [0], 3.5, 0);
+        placeSpecialObjects([{nx: 1, ny: -1}, {nx: 0, ny: -1}, {nx: 2, ny: -1}, {nx: 3, ny: -1}], 'park', [2], 4.5, -0.5);
+
+        placeSpecialObjects([{nx: 3, ny: -1}], 'park', [0], -3, 0);
+        placeSpecialObjects([{nx: 3, ny: -1}], 'park', [0], -1.5, 0);
+        placeSpecialObjects([{nx: 3, ny: -1}], 'park', [2], -0.5, -0.5);
+
+        // map bottom-left line
+        placeSpecialObjects([{nx: 0, ny: 3}, {nx: 1, ny: 3}, {nx: 2, ny: 3}, {nx: 3, ny: 3}], 'park', [1], 1, -3);
+        placeSpecialObjects([{nx: 0, ny: 3}, {nx: 1, ny: 3}, {nx: 2, ny: 3}, {nx: 3, ny: 3}], 'park', [0], 2, -2.5);
+        placeSpecialObjects([{nx: 0, ny: 3}, {nx: 1, ny: 3}, {nx: 2, ny: 3}, {nx: 3, ny: 3}], 'park', [0], 3.5, -2.5);
+        placeSpecialObjects([{nx: 0, ny: 3}, {nx: 1, ny: 3}, {nx: 2, ny: 3}, {nx: 3, ny: 3}], 'park', [2], 4.5, -3);
+
+        placeSpecialObjects([{nx: 3, ny: 3}], 'park', [0], -3, -2.5);
+        placeSpecialObjects([{nx: 3, ny: 3}], 'park', [0], -1.5, -2.5);
+        placeSpecialObjects([{nx: 3, ny: 3}], 'park', [2], -0.5, -3);
 
         console.log(map.map);
         return map;

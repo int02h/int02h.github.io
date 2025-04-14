@@ -15,7 +15,12 @@ class Path {
     }
 
     getInitialDirection() {
-        return this.path[0].direction;
+        const direction = this.path[0].direction;
+        if (!direction) {
+            console.warn('Initial direction is not set. Defaulting to UP.');
+            return ROAD_DIRECTION.UP; // TODO: remove this to debug
+        }
+        return direction;
     }
 }
 
