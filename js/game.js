@@ -1,40 +1,53 @@
 import {trips, createRandomTaxiTrip, placeOfficeObject} from './map.js';
 import {formatAmount, formatPrice} from './helpers.js';
 import {createEffects} from './effects.js';
+import {createGameEvents} from './game-events.js';
 import {Popup} from "./classes/Popup.js";
 
 const tickPerSecond = 10
 
+/**
+ * Global game state
+ */
 const defaultCtx = {
-    // params
+    /***** SECTION: params *****/
+    // How many rides happen per second
     rider_per_second: 0,
+    // Duration of a ride. During this time the driver is not available.
     ride_duration_s: 5,
 
-    // counters
+    /***** SECTION: counters *****/
     total_ride_count: 0,
     total_money: 0,
+    // Amount of available riders waiting for a ride. This is a supply part of supply-and-demand
     rider_count_raw: 0,
+    // Available rider count that is displayed in the UI. Contains integer numbers.
+    // This value is read-only and is calculated from rider_count_raw on every tick
     rider_count: 0,
+    // Amount of hired drivers
     total_driver_count: 1,
+    // Amount of drivers in the idle state. Drivers are available to take rides.
     available_driver_count: 1,
+    // The maximum amount of drivers that can be hired. This is a limit set by the taxi license.
     allowed_driver_count: 1,
 
-    // flags
+    /***** SECTION: flags *****/
     has_dispatcher: false,
 
-    // timestamps
-    driver_available_at: [],
-
-    // prices
+    /***** SECTION: prices *****/
     ride_price: 1.99,
     hire_driver_price: 10,
 
-    // effects and events
+    /***** SECTION: effects and events *****/
     applied_effects: [],
     occurred_events: [],
 
-    // time
-    tick: 0
+    /***** SECTION: time and timestamps *****/
+    // The amount of ticks that have passed since the game started.
+    tick: 0,
+    // The array of timestamps to track driver availability. If the driver is riding with a passenger, then
+    // the corresponding value is added to the array denoting the time when the driver will be available again.
+    driver_available_at: [],
 }
 let ctx = {}
 
@@ -82,10 +95,6 @@ function init() {
 
     if (localStorage.game_ctx) {
         ctx = JSON.parse(localStorage.game_ctx)
-        // temporary migration
-        if (ctx.occured_events) {
-            ctx.occurred_events = ctx.occured_events
-        }
     } else {
         ctx = defaultCtx
     }
@@ -201,14 +210,17 @@ function buildOffice() {
 
 function test() {
     console.log("test");
-    buildOffice();
+    //buildOffice();
+    pauseGame();
 }
 
 function pauseGame() {
+    console.log("pause game");
     clearInterval(gameTickIntervalId);
 }
 
 function resumeGame() {
+    console.log("resume game");
     onGameTick();
     gameTickIntervalId = setInterval(onGameTick, 1000 / tickPerSecond);
 }
