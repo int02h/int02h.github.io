@@ -191,12 +191,15 @@ class MapGenerator {
         placeSpecialObjects([{nx: 1, ny: 1}], 'house', [5], 0, 1);
         placeSpecialObjects([{nx: 1, ny: 1}], 'house', [1], 1, 0);
 
-        placeSpecialObjects([{nx: 1, ny: 2}], 'factory', [0], 0, 0);
-        placeSpecialObjects([{nx: 1, ny: 2}], 'factory', [1], 0, 1);
+        // place nice objects that will be replaced by ugly factories
+        placeSpecialObjects([{nx: 2, ny: 1}], 'house', [0], 0, 1);
+        placeSpecialObjects([{nx: 1, ny: 2}], 'house', [2], 0, 1);
+        placeSpecialObjects([{nx: 2, ny: 1}], 'park', [2], 0, 0);
+        placeSpecialObjects([{nx: 1, ny: 2}], 'park', [1], 0, 0);
 
         // an experiment
         // map top-right line
-        placeSpecialObjects([{nx: 1, ny: -1}, {nx: 0, ny: -1}, {nx: 2, ny: -1}, {nx: 3, ny: -1}], 'park', [1], 1, -0.5);
+        placeSpecialObjects([{nx: 1, ny: -1}, /*{nx: 0, ny: -1},*/ {nx: 2, ny: -1}, {nx: 3, ny: -1}], 'park', [1], 1, -0.5);
         placeSpecialObjects([{nx: 1, ny: -1}, {nx: 0, ny: -1}, {nx: 2, ny: -1}, {nx: 3, ny: -1}], 'park', [0], 2, 0);
         placeSpecialObjects([{nx: 1, ny: -1}, {nx: 0, ny: -1}, {nx: 2, ny: -1}, {nx: 3, ny: -1}], 'park', [0], 3.5, 0);
         placeSpecialObjects([{nx: 1, ny: -1}, {nx: 0, ny: -1}, {nx: 2, ny: -1}, {nx: 3, ny: -1}], 'park', [2], 4.5, -0.5);
@@ -214,6 +217,15 @@ class MapGenerator {
         placeSpecialObjects([{nx: 3, ny: 3}], 'park', [0], -3, -2.5);
         placeSpecialObjects([{nx: 3, ny: 3}], 'park', [0], -1.5, -2.5);
         placeSpecialObjects([{nx: 3, ny: 3}], 'park', [2], -0.5, -3);
+
+        // map top-left line
+        placeSpecialObjects([{nx: -1, ny: 0}, {nx: -1, ny: 1}, {nx: -1, ny: 2}, {nx: -1, ny: 3}], 'park', [1], -0.5, 1);
+        placeSpecialObjects([{nx: -1, ny: 1}, {nx: -1, ny: 0}, {nx: -1, ny: 2}, {nx: -1, ny: 3}], 'park', [0], 0, 2);
+        placeSpecialObjects([{nx: -1, ny: 1}, {nx: -1, ny: 0}, {nx: -1, ny: 2}, {nx: -1, ny: 3}], 'park', [0], 0, 3.5);
+        placeSpecialObjects([{nx: -1, ny: 1}, {nx: -1, ny: 0}, {nx: -1, ny: 2}, {nx: -1, ny: 3}], 'park', [2], -0.5, 4.5);
+
+        placeSpecialObjects([{nx: -1, ny: 3}], 'factory', [0], -0.5, -1.5);
+        placeSpecialObjects([{nx: -1, ny: 3}], 'factory', [1], -0.5, -0.5);
 
         console.log(map.map);
         return map;
