@@ -25,6 +25,12 @@ const Config = {
         'office-0.png',
         'factory-0.png',
         'factory-1.png',
+        'factory-2.png',
+        'factory-3.png',
+        'garage-0.png',
+        'garage-1.png',
+        'garage-2.png',
+        'garage-3.png',
     ],
     drawing: {
         tileSize: { width: 62, height: 32 },

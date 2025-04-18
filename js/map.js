@@ -202,6 +202,37 @@ export function placeOfficeObject(x, y) {
     localStorage.game_map = serializeGameMap(map);
 }
 
+export function placeGarageObject(x, y) {
+    map.setTile(x, y,
+        MapGenerator.cell(TILE_TYPES.NEIGHBORHOOD, {
+            neighborhoodType: 'garage',
+            neighborhoodVariant: Math.floor(Math.random() * 4)
+        }),
+    );
+    map.setTile(x + 2, y,
+        MapGenerator.cell(TILE_TYPES.NEIGHBORHOOD, {
+            neighborhoodType: 'garage',
+            neighborhoodVariant: Math.floor(Math.random() * 4)
+        }),
+    );
+    localStorage.game_map = serializeGameMap(map);
+}
+
+export function placeFactoryObject(x, y, variant) {
+    map.setTile(x, y,
+        MapGenerator.cell(TILE_TYPES.NEIGHBORHOOD, {neighborhoodType: 'factory', neighborhoodVariant: variant + 0}),
+    );
+    map.setTile(x, y - 2,
+        MapGenerator.cell(TILE_TYPES.NEIGHBORHOOD, {neighborhoodType: 'factory', neighborhoodVariant: variant + 1}),
+    );
+    localStorage.game_map = serializeGameMap(map);
+}
+
+export function setMapTile(x, y, type) {
+    map.setTile(x, y, MapGenerator.cell(type));
+    localStorage.game_map = serializeGameMap(map);
+}
+
 function serializeGameMap(gameMap) {
     const clonedMap = cloneDeep(gameMap);
     clonedMap.roadTiles = Array.from(clonedMap.roadTiles);
