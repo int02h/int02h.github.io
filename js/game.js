@@ -1,4 +1,4 @@
-import {trips, createRandomTaxiTrip, placeOfficeObject} from './map.js';
+import {trips, createRandomTaxiTrip, placeOfficeObject, placeGarageObject, placeFactoryObject} from './map.js';
 import {formatAmount, formatPrice} from './helpers.js';
 import {createEffects} from './effects.js';
 import {createGameEvents} from './game-events.js';
@@ -208,9 +208,27 @@ function buildOffice() {
     placeOfficeObject(20, 20);
 }
 
+function buildGarage() {
+    placeGarageObject(3, 1);
+    placeGarageObject(7, 1);
+    placeGarageObject(11, 1);
+}
+
+function buildFirstFactory() {
+    placeFactoryObject(30,20, 0)
+}
+
+function buildSecondFactory() {
+    placeFactoryObject(20,30, 2)
+}
+
 function test() {
-    console.log("test");
-    //buildOffice();
+    if (false) {
+        buildOffice();
+        buildGarage();
+        buildFirstFactory();
+        buildSecondFactory();
+    }
     pauseGame();
 }
 
