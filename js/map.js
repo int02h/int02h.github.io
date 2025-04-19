@@ -104,6 +104,10 @@ function centerGameOnScreen(canvas) {
 }
 
 function onMapAnimationTick() {
+    if (map.isPaused) {
+        return;
+    }
+
     mapRenderer?.drawMap(map.map, imageStorage);
 
     for (let trip of trips.filter(trip => !!trip)) {
@@ -121,6 +125,10 @@ function onMapAnimationTick() {
 }
 
 function onMapCalculationTick() {
+    if (map.isPaused) {
+        return;
+    }
+
     for (let trip of trips.filter(trip => !!trip)) {
         try {
             trip.move();
@@ -132,6 +140,10 @@ function onMapCalculationTick() {
 }
 
 export function createRandomTrip(carType = 'private') {
+    if (map.isPaused) {
+        return;
+    }
+
     const retries = 5;
     for (let i = 0; i < retries; i++) {
         try {
@@ -151,6 +163,10 @@ export function createRandomTrip(carType = 'private') {
 }
 
 export function createRandomTaxiTrip() {
+    if (map.isPaused) {
+        return undefined;
+    }
+
     const retries = 5;
     for (let i = 0; i < retries; i++) {
         try {
@@ -171,10 +187,8 @@ export function createRandomTaxiTrip() {
 
 function addEventListeners(canvas, map, isoCanvas) {
     canvas.addEventListener('click', (event) => {
-        // const rect = canvas.getBoundingClientRect();
-        // const x = event.clientX - rect.left;
-        // const y = event.clientY - rect.top;
-        // const mapCoords = isoCanvas.canvasToMapCoords(x, y);
+        console.log("start private trip by click is disabled");
+        return;
 
         for (let i = 0; i < 10; i++) {
             const start = map.getRandomInvisibleRoadTile();
@@ -187,12 +201,7 @@ function addEventListeners(canvas, map, isoCanvas) {
                 trips.push(trip);
             }
         }
-
-        // console.log('Map Coordinates:', mapCoords);
-        // console.log('Nearest road:', start);
     });
-
-
 }
 
 export function placeOfficeObject(x, y) {
@@ -231,6 +240,14 @@ export function placeFactoryObject(x, y, variant) {
 export function setMapTile(x, y, type) {
     map.setTile(x, y, MapGenerator.cell(type));
     localStorage.game_map = serializeGameMap(map);
+}
+
+export function pauseMap() {
+    map.isPaused = true;
+}
+
+export function resumeMap() {
+    map.isPaused = false;
 }
 
 function serializeGameMap(gameMap) {
