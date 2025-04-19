@@ -2,6 +2,7 @@ import {TILE_TYPES} from './PatternMatcher.js';
 
 class GameMap {
     constructor(size, map = undefined, roadTiles = undefined) {
+        this.isPaused = false;
         this.size = size;
         this.map = map ?? GameMap.emptyMapTiles(size);
         this.roadTiles = roadTiles ?? new Set();

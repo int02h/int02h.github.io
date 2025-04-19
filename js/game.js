@@ -1,4 +1,11 @@
-import {trips, createRandomTaxiTrip, placeOfficeObject, placeGarageObject, placeFactoryObject} from './map.js';
+import {
+    trips,
+    createRandomTaxiTrip,
+    placeOfficeObject,
+    placeGarageObject,
+    placeFactoryObject,
+    pauseMap, resumeMap
+} from './map.js';
 import {formatAmount, formatPrice} from './helpers.js';
 import {createEffects} from './effects.js';
 import {createGameEvents} from './game-events.js';
@@ -70,6 +77,8 @@ let gameTickIntervalId
 let nextEventToOccur
 
 let popup
+
+let paused = false;
 
 function init() {
     riderCountView = document.getElementById("rider_count")
@@ -184,7 +193,12 @@ function startRide() {
         ctx.driver_available_at.push({ tick: ctx.tick + rideDurationTicks, amount: rideCount})
 
         for (let i = 0; i < rideCount; i++) {
-            trips.push(createRandomTaxiTrip('taxi'));
+            const trip = createRandomTaxiTrip('taxi');
+            if (!trip) {
+                console.error("No trip ctreated");
+            } else {
+                trips.push(trip);
+            }
         }
     }
 }
@@ -229,7 +243,15 @@ function test() {
         buildFirstFactory();
         buildSecondFactory();
     }
-    pauseGame();
+
+    paused = !paused;
+    if (paused) {
+        pauseGame();
+        pauseMap();
+    } else {
+        resumeGame();
+        resumeMap();
+    }
 }
 
 function pauseGame() {
