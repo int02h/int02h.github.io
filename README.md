@@ -18,8 +18,19 @@ The most important files and folders in the project are:
 
 ## Run project locally
 
+### Using http-server
+
+**NB!** Requires Node.js
+
 Opening `index.html` in a browser is not enough due to CORS policy. A simple HTTP server is required to run the project.
 For example, [http-server](https://github.com/http-party/http-server):
 1. Install http-server
 2. Go to the project root directory
 3. Run `http-server` command without any arguments
+
+### Simple Go script
+
+**NB!** Requires Go
+
+1. Run `go run httpserv.go` in the root folder 
+2. Go to http://localhost:8080/
