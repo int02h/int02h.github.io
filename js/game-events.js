@@ -10,6 +10,22 @@ import {formatPrice} from "./helpers.js";
  */
 export const createGameEvents = function() {
 
+	/**
+	 * Has no effects when occur. It just displays a message.
+	 */
+	const elderBrotherSupport = new function() {
+		this.id = "elder_brother_support"
+		this.isReadyToOccur = function(ctx) {
+			return !ctx.occurred_events.includes(this.id) && ctx.applied_effects.includes("elder_brother")
+		}
+		this.getContent = function() {
+			return `Your elder brother has offered his help. You accepted. Now you both are taxi drivers. Sounds like a good foundation for a future #1 taxi company.`
+		}
+		this.occur = function(ctx) {
+			ctx.occurred_events.push(this.id)
+		}
+	}
+
 	const municipalSupport = new function() {
 		const amount = 1000
 
@@ -72,6 +88,7 @@ export const createGameEvents = function() {
 	}
 
 	return [
+		elderBrotherSupport,
 		municipalSupport,
 		inflation1,
 		competitorBankrupt,

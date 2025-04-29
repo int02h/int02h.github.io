@@ -11,6 +11,19 @@ import {formatPrice} from './helpers.js';
  */
 export const createEffects = function() {
 
+    const elderBrother = new function() {
+        this.id = "elder_brother",
+        this.getTitle = (ctx) => `Elder brother help`,
+        this.isVisible = (ctx) => ctx.total_driver_count == 1 && ctx.total_ride_count >= 15,
+        this.canApply = (ctx) => true,
+        this.apply = (ctx) => {
+            ctx.applied_effects.push(this.id)
+            ctx.available_driver_count = 2
+            ctx.total_driver_count = 2
+            ctx.allowed_driver_count = 2
+        }
+    }
+
     /**
      * A driver that makes trips and earns money. Amount of drivers is limited by the license.
      */
@@ -181,6 +194,7 @@ export const createEffects = function() {
     };
 
     return [
+        elderBrother,
         driver,
         dispatcher,
         taxiLicense10,
