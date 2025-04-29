@@ -30,7 +30,9 @@ export const createEffects = function() {
     const driver = new function() {
         this.id = "driver"
         this.getTitle = function(ctx) { return `Hire driver ${formatPrice(ctx.hire_driver_price)}`}
-        this.isVisible = function(ctx) { return ctx.applied_effects.includes(taxiLicense10.id) }
+        this.isVisible = function(ctx) { 
+            return ctx.applied_effects.includes(taxiLicense10.id) && ctx.total_driver_count < ctx.allowed_driver_count
+        }
         this.canApply = function(ctx) {
             return ctx.total_money >= ctx.hire_driver_price && ctx.total_driver_count < ctx.allowed_driver_count
         }
@@ -174,6 +176,34 @@ export const createEffects = function() {
         }
     };
 
+    const designLogo = new function() {
+        const price = 2500.00
+
+        this.id = "design_logo"
+        this.getTitle = (ctx) => `Design fancy logo ${formatPrice(price)}`
+        this.isVisible = (ctx) => !ctx.applied_effects.includes(this.id) && ctx.applied_effects.includes(billboards.id)
+        this.canApply = (ctx) => ctx.total_money >= price && this.isVisible(ctx)
+        this.apply = (ctx) => {
+            ctx.applied_effects.push(this.id)
+            ctx.rider_per_second = 7
+            ctx.total_money -= price
+        }
+    }
+
+    const filmAdWithLocalStar = new function() {
+        const price = 8_000.00
+
+        this.id = "film_ad_with_local_star"
+        this.getTitle = (ctx) => `File ad with local start ${formatPrice(price)}`
+        this.isVisible = (ctx) => !ctx.applied_effects.includes(this.id) && ctx.applied_effects.includes(designLogo.id)
+        this.canApply = (ctx) => ctx.total_money >= price && this.isVisible(ctx)
+        this.apply = (ctx) => {
+            ctx.applied_effects.push(this.id)
+            ctx.rider_per_second = 20
+            ctx.total_money -= price
+        }
+    }
+
     /**
      * It is used to attract customers. It increases the number of riders per second.
      */
@@ -183,7 +213,7 @@ export const createEffects = function() {
         this.id = "mobile_app"
         this.getTitle = function() { return `Develop mobile app ${formatPrice(price)}` }
         this.isVisible = function(ctx) {
-            return !ctx.applied_effects.includes(this.id) && ctx.applied_effects.includes(billboards.id)
+            return !ctx.applied_effects.includes(this.id) && ctx.applied_effects.includes(filmAdWithLocalStar.id)
         }
         this.canApply = function(ctx) { return ctx.total_money >= price && this.isVisible(ctx) }
         this.apply = function(ctx) {
@@ -203,6 +233,8 @@ export const createEffects = function() {
         stickers,
         leaflets,
         billboards,
+        designLogo,
+        filmAdWithLocalStar,
         mobileApp,
     ]
 }

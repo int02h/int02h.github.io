@@ -73,6 +73,31 @@ export const createGameEvents = function() {
 		}
 	}
 
+	const logoMakesPremium = new function() {
+		const newRidePrice = 4.19
+
+		this.id = "logo_makes_premium"
+		this.isReadyToOccur = (ctx) => 
+			!ctx.occurred_events.includes(this.id) && 
+			ctx.applied_effects.includes("design_logo") && 
+			ctx.total_ride_count >= 3200
+		this.getContent = (ctx) => `People around the city seem to like your new fancy logo. They now consider your service more <b>prestigious</b>.\n\nGood! You can increase fare to <b>${formatPrice(newRidePrice)}</b>`
+		this.occur = (ctx) => {
+			ctx.ride_price = newRidePrice
+			ctx.occurred_events.push(this.id)
+		}
+	}
+
+	const wordOfMouth = new function() {
+		this.id = "word_of_mouth"
+		this.isReadyToOccur = (ctx) => !ctx.occurred_events.includes(this.id) && ctx.total_driver_count > 55
+		this.getContent = (ctx) => `Word of mouth. People are talking about your service as the number of drivers grows.`
+		this.occur = (ctx) => {
+			ctx.rider_per_second = 10
+			ctx.occurred_events.push(this.id)
+		}
+	}
+
 	const mobileAppIsConvenient = new function() {
 		this.id = "mobile_app_is_convenient"
 		this.isReadyToOccur = function(ctx) {
@@ -92,6 +117,8 @@ export const createGameEvents = function() {
 		municipalSupport,
 		inflation1,
 		competitorBankrupt,
+		logoMakesPremium,
+		wordOfMouth,
 		mobileAppIsConvenient
 	]
 }
